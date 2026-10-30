@@ -8,8 +8,8 @@ export default function MarketNavigation() {
   const pathname = usePathname()
 
   const tabs = [
-    { href: '/', label: 'Mi Compra', icon: 'cart' as const },
-    { href: '/listas', label: 'Listas', icon: 'list' as const },
+    { href: '/', label: 'Mis Listas', icon: 'list' as const },
+    { href: '/compra', label: 'Mi Compra', icon: 'cart' as const },
     { href: '/ajustes', label: 'Ajustes', icon: 'settings' as const },
   ]
 
@@ -33,7 +33,10 @@ export default function MarketNavigation() {
       }}
     >
       {tabs.map((tab) => {
-        const isActive = pathname === tab.href
+        const isActive =
+          tab.href === '/'
+            ? pathname === '/' || pathname === '/listas'
+            : pathname === tab.href
         return (
           <Link
             key={tab.href}

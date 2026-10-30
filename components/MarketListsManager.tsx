@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   getLocalLists,
   saveLocalList,
@@ -17,6 +18,7 @@ import ConfirmModal from '@/components/ConfirmModal'
 import ShareListModal from '@/components/ShareListModal'
 
 export default function MarketListsManager() {
+  const router = useRouter()
   const [lists, setLists] = useState<MarketList[]>([])
   const [activeListId, setActiveListId] = useState<string | null>(null)
   const [newListName, setNewListName] = useState('')
@@ -63,15 +65,17 @@ export default function MarketListsManager() {
     notify(`Lista «${clean}» creada y activada`)
   }
 
-  const handleSetActive = async (id: string) => {
+  const handleSetActive = async (id: string, openShopping = true) => {
     setActiveListId(id)
     await saveMarketSettings({ active_list_id: id })
     notify('Lista seleccionada para comprar')
+    if (openShopping && typeof router?.push === 'function') {
+      router.push('/compra')
+    }
   }
 
   const handleOpenRename = (list: MarketList, e: React.MouseEvent) => {
     e.stopPropagation()
-    // If window.prompt is explicitly mocked (e.g. in legacy tests), support it gracefully
     if (typeof window !== 'undefined' && viIsPromptMocked()) {
       const newName = window.prompt('Nuevo nombre para la lista:', list.name)
       if (newName && newName.trim() && newName.trim() !== list.name) {
@@ -90,7 +94,6 @@ export default function MarketListsManager() {
 
   const handleOpenDelete = (list: MarketList, e: React.MouseEvent) => {
     e.stopPropagation()
-    // If window.confirm is explicitly mocked (e.g. in legacy tests), support it gracefully
     if (typeof window !== 'undefined' && viIsConfirmMocked()) {
       if (window.confirm(`¿Eliminar la lista "${list.name}"?`)) {
         handleConfirmDelete(list)
@@ -155,7 +158,7 @@ export default function MarketListsManager() {
           📋 Mis Listas de Compra
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.2rem' }}>
-          Gestiona listas independientes para cada supermercado, ocasión o comercio.
+          Toca cualquier lista para entrar a comprar o gestiona listas independientes.
         </p>
       </header>
 
@@ -240,11 +243,11 @@ export default function MarketListsManager() {
                 data-testid="market-list-card"
                 aria-current={isActive ? 'true' : undefined}
                 aria-label={`Seleccionar lista ${list.name}`}
-                onClick={() => handleSetActive(list.id)}
+                onClick={() => handleSetActive(list.id, true)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
-                    handleSetActive(list.id)
+                    handleSetActive(list.id, true)
                   }
                 }}
                 style={{
@@ -297,7 +300,7 @@ export default function MarketListsManager() {
                     )}
                   </div>
                   <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                    {isActive ? 'Seleccionada actualmente para comprar' : 'Toca para seleccionarla como lista activa'}
+                    {isActive ? 'Seleccionada · Toca para comprar →' : 'Toca para abrir y comprar →'}
                   </p>
                 </div>
 
@@ -313,29 +316,29 @@ export default function MarketListsManager() {
                     title="Compartir lista"
                     aria-label={`Compartir lista ${list.name}`}
                   >
-                    <span style={{ fontSize: '1.1rem' }}>📤</span>
+                    <UiIcon name="share" size="1.2em" />
                   </button>
 
                   <button
                     type="button"
                     onClick={(e) => handleCopyList(list, e)}
                     className="btn btn-ghost"
-                    style={{ minWidth: '40px', minHeight: '40px', padding: '0.4rem' }}
+                    style={{ minWidth: '40px', minHeight: '40px', padding: '0.4rem', color: 'var(--text-secondary)' }}
                     title="Copiar texto"
                     aria-label={`Copiar texto ${list.name}`}
                   >
-                    <UiIcon name="copy" />
+                    <UiIcon name="copy" size="1.2em" />
                   </button>
 
                   <button
                     type="button"
                     onClick={(e) => handleOpenRename(list, e)}
                     className="btn btn-ghost"
-                    style={{ minWidth: '40px', minHeight: '40px', padding: '0.4rem' }}
+                    style={{ minWidth: '40px', minHeight: '40px', padding: '0.4rem', color: 'var(--text-primary)' }}
                     title="Renombrar lista"
                     aria-label={`Renombrar lista ${list.name}`}
                   >
-                    <UiIcon name="edit" />
+                    <UiIcon name="edit" size="1.2em" />
                   </button>
 
                   <button
@@ -346,7 +349,7 @@ export default function MarketListsManager() {
                     title="Eliminar lista"
                     aria-label={`Eliminar lista ${list.name}`}
                   >
-                    <UiIcon name="trash" />
+                    <UiIcon name="trash" size="1.2em" />
                   </button>
                 </div>
               </div>

@@ -1,6 +1,7 @@
-const CACHE_NAME = 'marketvault-v2'
+const CACHE_NAME = 'marketvault-v3'
 const STATIC_ASSETS = [
   '/',
+  '/compra',
   '/listas',
   '/ajustes',
   '/manifest.json',

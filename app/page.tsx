@@ -1,5 +1,5 @@
-import MarketActiveList from '@/components/MarketActiveList'
+import MarketListsManager from '@/components/MarketListsManager'
 
 export default function MarketHomePage() {
-  return <MarketActiveList />
+  return <MarketListsManager />
 }
