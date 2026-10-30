@@ -374,3 +374,85 @@ export function planToShoppingText(
     })
     .join('\n')
 }
+
+// ── Smart Item Input Parser ───────────────────────────────────
+
+export function parseItemInput(raw: string): {
+  name: string
+  quantity: number | null
+  unit: string | null
+  category: ShoppingCategory
+} {
+  const clean = raw.trim()
+  if (!clean) {
+    return { name: '', quantity: null, unit: null, category: 'otros' }
+  }
+
+  const unitWords = 'kg|kilos?|g|gr|gramos?|l|litros?|ml|botes?|latas?|bricks?|paquetes?|unidades?|uds?|botellas?'
+
+  // Pattern 1: Leading quantity (e.g., "1kg platanos", "2 bricks de leche", "3 manzanas", "500g carne")
+  const leadingMatch = clean.match(new RegExp(`^([\\d]+(?:[.,][\\d]+)?)\\s*(${unitWords})?\\s*(?:de\\s+)?(.*)$`, 'i'))
+  if (leadingMatch && leadingMatch[3]?.trim()) {
+    const qty = parseFloat(leadingMatch[1].replace(',', '.'))
+    const rawUnit = leadingMatch[2]?.toLowerCase() || null
+    const name = leadingMatch[3].trim()
+    return {
+      name: name.charAt(0).toUpperCase() + name.slice(1),
+      quantity: isNaN(qty) ? null : qty,
+      unit: rawUnit,
+      category: categorize(name),
+    }
+  }
+
+  // Pattern 2: Trailing quantity (e.g., "Platanos 1kg", "Leche 2 l", "Tomates 500g", "Huevos 12")
+  const trailingMatch = clean.match(new RegExp(`^(.*?)(?:\\s+|-|:)\\s*([\\d]+(?:[.,][\\d]+)?)\\s*(${unitWords})?$`, 'i'))
+  if (trailingMatch && trailingMatch[1]?.trim()) {
+    const name = trailingMatch[1].trim()
+    const qty = parseFloat(trailingMatch[2].replace(',', '.'))
+    const rawUnit = trailingMatch[3]?.toLowerCase() || null
+    return {
+      name: name.charAt(0).toUpperCase() + name.slice(1),
+      quantity: isNaN(qty) ? null : qty,
+      unit: rawUnit,
+      category: categorize(name),
+    }
+  }
+
+  // Fallback
+  return {
+    name: clean.charAt(0).toUpperCase() + clean.slice(1),
+    quantity: null,
+    unit: null,
+    category: categorize(clean),
+  }
+}
+
+// ── Formatted Sharing Text (WhatsApp / Native Share) ──────────
+
+export function formatShareListText(
+  listName: string,
+  items: Array<{ name: string; quantity: number | null; unit: string | null; is_checked: boolean; category?: string }>
+): string {
+  const pending = items.filter((i) => !i.is_checked)
+  if (pending.length === 0) {
+    return `🛒 *${listName}*\n\n¡La lista está vacía o ya se ha comprado todo! 🎉`
+  }
+
+  const lines: string[] = [`🛒 *${listName}* (${pending.length} productos pendientes):\n`]
+
+  for (const cat of CATEGORY_ORDER) {
+    const catItems = pending.filter((i) => (i.category || categorize(i.name)) === cat)
+    if (catItems.length > 0) {
+      const meta = CATEGORY_LABELS[cat] || { label: cat, emoji: '🛒' }
+      lines.push(`${meta.emoji} *${meta.label}*:`)
+      for (const item of catItems) {
+        const emoji = getIngredientEmoji(item.name, cat)
+        const qty = item.quantity ? `${item.quantity}${item.unit ? ' ' + item.unit : ''} ` : ''
+        lines.push(`  • ${emoji} ${qty}${item.name}`)
+      }
+      lines.push('')
+    }
+  }
+
+  return lines.join('\n').trim()
+}

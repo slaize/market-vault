@@ -1,11 +1,14 @@
-const CACHE_NAME = 'marketvault-v1'
+const CACHE_NAME = 'marketvault-v2'
 const STATIC_ASSETS = [
   '/',
+  '/listas',
+  '/ajustes',
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/icon-maskable-192.png',
   '/icons/icon-maskable-512.png',
+  '/icons/icon.svg',
 ]
 
 self.addEventListener('install', (event) => {

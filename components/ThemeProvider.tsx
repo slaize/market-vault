@@ -95,15 +95,7 @@ export function ThemeProvider({
     document.documentElement.setAttribute('data-theme', theme)
     const meta = document.querySelector('meta[name="theme-color"]')
     if (meta) {
-      meta.setAttribute('content', THEME_HEX_MAP[theme] || '#FAF6EE')
-    }
-    const iconLink = document.querySelector('link[rel="icon"]')
-    if (iconLink) {
-      iconLink.setAttribute('href', THEME_ICON_MAP[theme] || '/icons/icon.svg')
-    }
-    const appleIcon = document.querySelector('link[rel="apple-touch-icon"]')
-    if (appleIcon) {
-      appleIcon.setAttribute('href', THEME_ICON_MAP[theme] || '/icons/icon.svg')
+      meta.setAttribute('content', THEME_HEX_MAP[theme] || '#0F172A')
     }
   }, [theme])
 
@@ -117,18 +109,6 @@ export function ThemeProvider({
     } catch {
       // LocalStorage access restricted
     }
-
-    startTransition(async () => {
-      try {
-        await fetch('/api/user/theme', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ theme: next }),
-        })
-      } catch {
-        // Non-critical: local state and cookie are already updated
-      }
-    })
   }
 
   return (

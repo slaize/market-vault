@@ -13,6 +13,7 @@ export interface MarketList {
 export interface MarketItem {
   id: string
   list_id: string
+  remote_item_id?: string | null
   name: string
   quantity: number | null
   unit: string | null
@@ -26,6 +27,7 @@ export interface MarketSettings {
   active_list_id: string | null
   sync_mode: 'local_only' | 'user_account' | 'paired_household'
   paired_code: string | null
+  paired_token?: string | null
   last_synced_at: string | null
 }
 
@@ -128,10 +130,36 @@ export async function getLocalItems(listId: string): Promise<MarketItem[]> {
   })
 }
 
+export async function updateLocalListName(id: string, name: string): Promise<MarketList | null> {
+  const db = await openDb()
+  const clean = name.trim()
+  if (!clean) return null
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('lists', 'readwrite')
+    const store = tx.objectStore('lists')
+    const req = store.get(id)
+    req.onsuccess = () => {
+      const list = req.result as MarketList | undefined
+      if (!list) return resolve(null)
+      list.name = clean
+      list.updated_at = new Date().toISOString()
+      store.put(list)
+      tx.oncomplete = () => resolve(list)
+    }
+    req.onerror = () => reject(req.error)
+  })
+}
+
+export async function findLocalListByRemoteId(remoteId: string): Promise<MarketList | null> {
+  const lists = await getLocalLists()
+  return lists.find((l) => l.remote_list_id === remoteId) || null
+}
+
 export async function saveLocalItem(
   input: {
     id?: string
     list_id: string
+    remote_item_id?: string | null
     name: string
     quantity?: number | null
     unit?: string | null
@@ -146,6 +174,7 @@ export async function saveLocalItem(
   const item: MarketItem = {
     id: input.id || crypto.randomUUID(),
     list_id: input.list_id,
+    remote_item_id: input.remote_item_id ?? null,
     name: cleanName,
     quantity: input.quantity ?? null,
     unit: input.unit ?? null,
@@ -160,6 +189,24 @@ export async function saveLocalItem(
     tx.objectStore('items').put(item)
     tx.oncomplete = () => resolve(item)
     tx.onerror = () => reject(tx.error)
+  })
+}
+
+export async function updateLocalItemRemoteId(id: string, remoteItemId: string): Promise<void> {
+  const db = await openDb()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('items', 'readwrite')
+    const store = tx.objectStore('items')
+    const req = store.get(id)
+    req.onsuccess = () => {
+      const item = req.result as MarketItem | undefined
+      if (item) {
+        item.remote_item_id = remoteItemId
+        store.put(item)
+      }
+      tx.oncomplete = () => resolve()
+    }
+    req.onerror = () => reject(req.error)
   })
 }
 

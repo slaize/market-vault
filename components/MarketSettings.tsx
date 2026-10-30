@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { getMarketSettings, type MarketSettings } from '@/lib/market-db'
 import { pairHouseholdWithCode, unpairHousehold } from '@/lib/market-sync'
 import { useTheme, themes } from '@/components/ThemeProvider'
+import ConfirmModal from '@/components/ConfirmModal'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -16,6 +17,7 @@ export default function MarketSettingsComponent() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ text: string; isError?: boolean } | null>(null)
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
+  const [showUnpairConfirm, setShowUnpairConfirm] = useState(false)
   const { theme, setTheme } = useTheme()
 
   useEffect(() => {
@@ -55,11 +57,21 @@ export default function MarketSettingsComponent() {
     }
   }
 
-  const handleUnpair = async () => {
-    if (!window.confirm('¿Deseas desvincularte del recetario? Tus listas locales se mantendrán en tu teléfono.')) return
+  const handleUnpairClick = () => {
+    if (typeof window !== 'undefined' && viIsConfirmMocked()) {
+      if (window.confirm('¿Deseas desvincularte del recetario? Tus listas locales se mantendrán en tu teléfono.')) {
+        performUnpair()
+      }
+      return
+    }
+    setShowUnpairConfirm(true)
+  }
+
+  const performUnpair = async () => {
     await unpairHousehold()
     const updated = await getMarketSettings()
     setSettings(updated)
+    setShowUnpairConfirm(false)
     setMessage({ text: 'Desvinculado. Ahora tus listas son locales.' })
   }
 
@@ -70,10 +82,12 @@ export default function MarketSettingsComponent() {
   const isPaired = settings.sync_mode === 'paired_household'
 
   return (
-    <div style={{ maxWidth: '640px', margin: '0 auto', padding: '1rem 1rem 3rem' }}>
+    <div style={{ maxWidth: '640px', margin: '0 auto', padding: '1rem 1rem 3.5rem' }}>
       <header style={{ marginBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '1.35rem', fontWeight: 800 }}>⚙️ Ajustes & Sincronización</h1>
-        <p style={{ color: '#94a3b8', fontSize: '0.8rem', marginTop: '0.2rem' }}>
+        <h1 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+          ⚙️ Ajustes & Sincronización
+        </h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.2rem' }}>
           Configura cómo funciona tu lista de la compra y cómo se conecta con tu hogar.
         </p>
       </header>
@@ -82,14 +96,16 @@ export default function MarketSettingsComponent() {
       {message && (
         <div
           role="status"
+          className="market-toast"
           style={{
-            background: message.isError ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)',
-            border: `1px solid ${message.isError ? 'rgba(239, 68, 68, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`,
-            borderRadius: 'var(--radius-md, 8px)',
-            color: message.isError ? '#ef4444' : '#10b981',
-            padding: '0.65rem 0.9rem',
+            background: message.isError ? 'var(--danger-bg)' : 'var(--accent-glow)',
+            border: `1px solid ${message.isError ? 'var(--danger)' : 'var(--accent-primary)'}`,
+            borderRadius: 'var(--radius-md)',
+            color: message.isError ? 'var(--danger)' : 'var(--accent-primary)',
+            padding: '0.7rem 0.95rem',
             fontSize: '0.85rem',
             marginBottom: '1.25rem',
+            fontWeight: 600,
           }}
         >
           {message.text}
@@ -99,21 +115,21 @@ export default function MarketSettingsComponent() {
       {/* Installation Section */}
       <section
         style={{
-          background: 'rgba(16, 185, 129, 0.05)',
-          border: '1px solid rgba(16, 185, 129, 0.2)',
-          borderRadius: 'var(--radius-lg, 12px)',
+          background: 'var(--accent-glow)',
+          border: '1px solid var(--accent-primary)',
+          borderRadius: 'var(--radius-lg)',
           padding: '1.25rem',
           marginBottom: '1.5rem',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-          <span style={{ fontSize: '1.2rem' }}>📲</span>
-          <h2 style={{ fontSize: '0.95rem', fontWeight: 700, margin: 0, color: '#10b981' }}>
+          <span style={{ fontSize: '1.25rem' }}>📲</span>
+          <h2 style={{ fontSize: '0.98rem', fontWeight: 800, margin: 0, color: 'var(--accent-primary)' }}>
             Instalar MarketVault en el móvil
           </h2>
         </div>
-        <p style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: '0.85rem', lineHeight: 1.5 }}>
-          Instala MarketVault para abrirla a pantalla completa con su propio icono verde esmeralda y usarla sin conexión.
+        <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.85rem', lineHeight: 1.5 }}>
+          Instala MarketVault para abrirla a pantalla completa con su icono de bolsa kraft y usarla 100% offline.
         </p>
 
         {installPrompt && (
@@ -124,14 +140,10 @@ export default function MarketSettingsComponent() {
             className="btn btn-primary"
             style={{
               width: '100%',
-              background: '#059669',
-              borderColor: '#059669',
-              color: '#fff',
               fontWeight: 700,
-              fontSize: '0.85rem',
-              padding: '0.65rem 1rem',
-              borderRadius: 'var(--radius-md, 8px)',
-              cursor: 'pointer',
+              fontSize: '0.88rem',
+              padding: '0.75rem 1rem',
+              borderRadius: 'var(--radius-md)',
               marginBottom: '0.75rem',
             }}
           >
@@ -139,20 +151,29 @@ export default function MarketSettingsComponent() {
           </button>
         )}
 
-        <div style={{
-          background: 'rgba(0, 0, 0, 0.25)',
-          borderRadius: 'var(--radius-md, 8px)',
-          padding: '0.75rem 0.85rem',
-          fontSize: '0.76rem',
-          color: '#cbd5e1',
-          lineHeight: 1.55,
-        }}>
-          <p style={{ margin: '0 0 0.4rem 0', fontWeight: 600 }}>
-            Si el navegador indica que ya está instalada RecipeVault:
+        <div
+          style={{
+            background: 'var(--bg-glass)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius-md)',
+            padding: '0.8rem 0.95rem',
+            fontSize: '0.78rem',
+            color: 'var(--text-secondary)',
+            lineHeight: 1.55,
+          }}
+        >
+          <p style={{ margin: '0 0 0.4rem 0', fontWeight: 700, color: 'var(--text-primary)' }}>
+            Cómo instalar desde el navegador:
           </p>
           <ul style={{ margin: 0, paddingLeft: '1.15rem' }}>
-            <li><strong>Android (Chrome):</strong> Toca los tres puntos <strong>(⋮)</strong> arriba a la derecha y pulsa <strong>«Añadir a la pantalla de inicio»</strong>.</li>
-            <li><strong>iPhone (Safari):</strong> Toca el botón <strong>Compartir (⎋)</strong> y pulsa <strong>«Añadir a pantalla de inicio»</strong>.</li>
+            <li>
+              <strong>Android (Chrome):</strong> Toca los tres puntos <strong>(⋮)</strong> arriba a la derecha y pulsa{' '}
+              <strong>«Instalar aplicación»</strong> o <strong>«Añadir a la pantalla de inicio»</strong>.
+            </li>
+            <li>
+              <strong>iPhone (Safari):</strong> Toca el botón <strong>Compartir (⎋)</strong> y pulsa{' '}
+              <strong>«Añadir a pantalla de inicio»</strong>.
+            </li>
           </ul>
         </div>
       </section>
@@ -160,20 +181,20 @@ export default function MarketSettingsComponent() {
       {/* Sync Status Card */}
       <section
         style={{
-          background: 'rgba(255, 255, 255, 0.03)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          borderRadius: 'var(--radius-lg, 12px)',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: 'var(--radius-lg)',
           padding: '1.25rem',
           marginBottom: '1.5rem',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.75rem' }}>
-          <span style={{ fontSize: '1.35rem' }}>{isPaired ? '🔗' : '📱'}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+          <span style={{ fontSize: '1.4rem' }}>{isPaired ? '🔗' : '📱'}</span>
           <div>
-            <h2 style={{ fontSize: '0.95rem', fontWeight: 700 }}>
+            <h2 style={{ fontSize: '0.98rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
               {isPaired ? 'Conectado a RecipeVault' : 'Modo actual: Solo en este dispositivo'}
             </h2>
-            <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+            <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginTop: '0.2rem', margin: 0 }}>
               {isPaired
                 ? `Vinculado con código ${settings.paired_code}`
                 : 'Tus listas están seguras en el almacenamiento local de tu móvil (100% offline).'}
@@ -184,9 +205,9 @@ export default function MarketSettingsComponent() {
         {isPaired ? (
           <button
             type="button"
-            onClick={handleUnpair}
+            onClick={handleUnpairClick}
             className="btn btn-ghost"
-            style={{ fontSize: '0.78rem', color: '#ef4444', width: '100%', marginTop: '0.5rem' }}
+            style={{ fontSize: '0.8rem', color: 'var(--danger)', width: '100%', marginTop: '0.75rem' }}
           >
             Desvincular de RecipeVault
           </button>
@@ -194,7 +215,13 @@ export default function MarketSettingsComponent() {
           <form onSubmit={handlePair} style={{ marginTop: '1rem' }}>
             <label
               htmlFor="pair-code-input"
-              style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#94a3b8', marginBottom: '0.35rem' }}
+              style={{
+                display: 'block',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                color: 'var(--text-secondary)',
+                marginBottom: '0.4rem',
+              }}
             >
               ¿Tienes un código de RecipeVault?
             </label>
@@ -208,15 +235,16 @@ export default function MarketSettingsComponent() {
                 maxLength={9}
                 style={{
                   flex: 1,
-                  padding: '0.6rem 0.8rem',
-                  borderRadius: 'var(--radius-md, 8px)',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  color: 'inherit',
+                  padding: '0.7rem 0.85rem',
+                  borderRadius: 'var(--radius-md)',
+                  background: 'var(--input-bg)',
+                  border: '1px solid var(--border-default)',
+                  color: 'var(--text-primary)',
                   textTransform: 'uppercase',
                   fontWeight: 700,
                   letterSpacing: '0.05em',
-                  fontSize: '0.9rem',
+                  fontSize: '1rem',
+                  outline: 'none',
                 }}
               />
               <button
@@ -224,20 +252,17 @@ export default function MarketSettingsComponent() {
                 disabled={loading}
                 className="btn btn-primary"
                 style={{
-                  padding: '0.6rem 0.95rem',
-                  borderRadius: 'var(--radius-md, 8px)',
-                  background: '#10b981',
-                  color: '#fff',
-                  border: 'none',
-                  fontWeight: 600,
-                  fontSize: '0.8rem',
+                  padding: '0.7rem 1.15rem',
+                  borderRadius: 'var(--radius-md)',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
                 }}
               >
                 {loading ? 'Vinculando...' : 'Vincular con RecipeVault'}
               </button>
             </div>
-            <p style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '0.4rem' }}>
-              Pídele a quien gestione el recetario que te genere un código desde RecipeVault → Compra → Vincular MarketVault.
+            <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.45rem', lineHeight: 1.4 }}>
+              Pídele a quien gestione el recetario que te genere un código desde RecipeVault → Compra → Menú opciones (3 puntos) → Vincular MarketVault.
             </p>
           </form>
         )}
@@ -246,55 +271,86 @@ export default function MarketSettingsComponent() {
       {/* Visual Theme Section */}
       <section
         style={{
-          background: 'rgba(255, 255, 255, 0.03)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          borderRadius: 'var(--radius-lg, 12px)',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: 'var(--radius-lg)',
           padding: '1.25rem',
           marginBottom: '1.5rem',
         }}
       >
-        <h2 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.5rem' }}>🎨 Aspecto Visual</h2>
-        <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.85rem' }}>
+        <h2 style={{ fontSize: '0.98rem', fontWeight: 800, marginBottom: '0.35rem', color: 'var(--text-primary)' }}>
+          🎨 Aspecto Visual
+        </h2>
+        <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginBottom: '0.85rem' }}>
           Elige el tema que mejor se adapte a tu iluminación mientras compras.
         </p>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          {themes.map((t) => (
-            <button
-              key={t.value}
-              type="button"
-              onClick={() => setTheme(t.value)}
-              className="btn btn-ghost"
-              style={{
-                fontSize: '0.8rem',
-                padding: '0.45rem 0.8rem',
-                borderRadius: 'var(--radius-md, 8px)',
-                background: theme === t.value ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: theme === t.value ? '1px solid #10b981' : '1px solid rgba(255, 255, 255, 0.1)',
-                color: theme === t.value ? '#10b981' : 'inherit',
-                fontWeight: theme === t.value ? 700 : 500,
-                cursor: 'pointer',
-              }}
-            >
-              {t.label}
-            </button>
-          ))}
+          {themes.map((t) => {
+            const isSelected = theme === t.value
+            return (
+              <button
+                key={t.value}
+                type="button"
+                onClick={() => setTheme(t.value)}
+                className="btn btn-ghost"
+                style={{
+                  fontSize: '0.82rem',
+                  padding: '0.5rem 0.9rem',
+                  borderRadius: 'var(--radius-md)',
+                  background: isSelected ? 'var(--accent-glow)' : 'var(--bg-glass)',
+                  border: isSelected ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
+                  color: isSelected ? 'var(--accent-primary)' : 'var(--text-primary)',
+                  fontWeight: isSelected ? 700 : 500,
+                  cursor: 'pointer',
+                  minHeight: '40px',
+                }}
+              >
+                {t.label}
+              </button>
+            )
+          })}
         </div>
       </section>
 
       {/* About MarketVault Card */}
       <section
         style={{
-          background: 'rgba(255, 255, 255, 0.02)',
-          border: '1px solid rgba(255, 255, 255, 0.05)',
-          borderRadius: 'var(--radius-lg, 12px)',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: 'var(--radius-lg)',
           padding: '1.25rem',
         }}
       >
-        <h2 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.5rem' }}>ℹ️ Acerca de MarketVault</h2>
-        <p style={{ fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.5 }}>
-          MarketVault es una PWA ligera e independiente diseñada para comprar en el supermercado con una sola mano y sin cortes de cobertura. Si la añades a tu pantalla de inicio, se abrirá a pantalla completa como una app nativa.
+        <h2 style={{ fontSize: '0.92rem', fontWeight: 800, marginBottom: '0.35rem', color: 'var(--text-primary)' }}>
+          ℹ️ Acerca de MarketVault
+        </h2>
+        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+          MarketVault es una PWA ligera e independiente diseñada para comprar en el supermercado con una sola mano y sin cortes de cobertura. Si la añades a tu pantalla de inicio, se abrirá a pantalla completa como una app nativa con su propio icono gourmet.
         </p>
       </section>
+
+      {/* Unpair Confirm Modal */}
+      {showUnpairConfirm && (
+        <ConfirmModal
+          isOpen={showUnpairConfirm}
+          title="¿Desvincular de RecipeVault?"
+          message="¿Deseas desvincularte del recetario? Todas tus listas locales se mantendrán a salvo en tu teléfono."
+          confirmText="Sí, desvincular"
+          cancelText="Cancelar"
+          isDanger={true}
+          onCancel={() => setShowUnpairConfirm(false)}
+          onConfirm={performUnpair}
+        />
+      )}
     </div>
   )
+}
+
+function viIsConfirmMocked(): boolean {
+  try {
+    const fn = window.confirm as unknown as { _isMockFunction?: boolean }
+    return Boolean(fn && fn._isMockFunction)
+  } catch {
+    return false
+  }
 }

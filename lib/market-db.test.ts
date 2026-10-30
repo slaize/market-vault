@@ -10,6 +10,8 @@ import {
   clearCheckedLocalItems,
   getMarketSettings,
   saveMarketSettings,
+  updateLocalListName,
+  findLocalListByRemoteId,
 } from './market-db'
 
 // Polyfill in-memory IndexedDB for jsdom environment if not provided
@@ -254,5 +256,23 @@ describe('MarketVault Local-First IndexedDB Engine', () => {
     const updated = await getMarketSettings()
     expect(updated.sync_mode).toBe('paired_household')
     expect(updated.paired_code).toBe('RV-1234')
+  })
+
+  it('renames an existing local list', async () => {
+    const list = await saveLocalList({ name: 'Lista Original' })
+    const renamed = await updateLocalListName(list.id, 'Lista Renombrada')
+    expect(renamed?.name).toBe('Lista Renombrada')
+
+    const all = await getLocalLists()
+    expect(all[0].name).toBe('Lista Renombrada')
+  })
+
+  it('finds a local list by remote_list_id', async () => {
+    await saveLocalList({ name: 'Lista Remota', remote_list_id: 'rem-999' })
+    const found = await findLocalListByRemoteId('rem-999')
+    expect(found?.name).toBe('Lista Remota')
+
+    const notFound = await findLocalListByRemoteId('unknown')
+    expect(notFound).toBeNull()
   })
 })
