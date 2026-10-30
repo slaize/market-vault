@@ -712,7 +712,7 @@ export default function MarketActiveList() {
                 fontWeight: 800,
                 textTransform: 'uppercase',
                 letterSpacing: '0.04em',
-                color: 'var(--accent-primary)',
+                color: 'var(--accent-secondary)',
                 marginBottom: '0.45rem',
                 display: 'flex',
                 alignItems: 'center',

@@ -15,6 +15,9 @@
   --accent-primary: #10B981;
   --accent-hover: #059669;
   --accent-glow: rgba(16, 185, 129, 0.18);
+  --accent-secondary: #FB7185;
+  --accent-secondary-dark: #E11D48;
+  --accent-secondary-glow: rgba(251, 113, 133, 0.18);
   --input-bg: rgba(255, 255, 255, 0.05);
   --danger: #EF4444;
   --danger-bg: rgba(239, 68, 68, 0.15);
@@ -42,6 +45,9 @@
   --accent-primary: #059669;
   --accent-hover: #047857;
   --accent-glow: rgba(5, 150, 105, 0.12);
+  --accent-secondary: #8A1538;
+  --accent-secondary-dark: #5B0E24;
+  --accent-secondary-glow: rgba(138, 21, 56, 0.10);
   --input-bg: #FFFFFF;
   --danger: #DC2626;
   --danger-bg: rgba(220, 38, 38, 0.1);
@@ -64,6 +70,9 @@
   --accent-primary: #F97316;
   --accent-hover: #EA580C;
   --accent-glow: rgba(249, 115, 22, 0.25);
+  --accent-secondary: #C084FC;
+  --accent-secondary-dark: #A855F7;
+  --accent-secondary-glow: rgba(192, 132, 252, 0.20);
   --input-bg: rgba(249, 115, 22, 0.08);
   --danger: #EF4444;
   --danger-bg: rgba(239, 68, 68, 0.15);
@@ -86,6 +95,9 @@
   --accent-primary: #F43F5E;
   --accent-hover: #E11D48;
   --accent-glow: rgba(244, 63, 94, 0.28);
+  --accent-secondary: #10B981;
+  --accent-secondary-dark: #059669;
+  --accent-secondary-glow: rgba(16, 185, 129, 0.20);
   --input-bg: rgba(255, 255, 255, 0.06);
   --danger: #EF4444;
   --danger-bg: rgba(239, 68, 68, 0.15);

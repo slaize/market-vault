@@ -26,7 +26,7 @@ export const CATEGORY_LABELS: Record<ShoppingCategory, { label: string; emoji: s
   'frutas-verduras': { label: 'Frutas y Verduras',  emoji: '🥦' },
   'lacteos':         { label: 'Lácteos',             emoji: '🧀' },
   'cereales-pan':    { label: 'Cereales y Pan',      emoji: '🌾' },
-  'despensa':        { label: 'Despensa',             emoji: '🫙' },
+  'despensa':        { label: 'Despensa',             emoji: '🥫' },
   'congelados':      { label: 'Congelados',           emoji: '🧊' },
   'bebidas':         { label: 'Bebidas',              emoji: '🥤' },
   'otros':           { label: 'Otros',                emoji: '🛒' },

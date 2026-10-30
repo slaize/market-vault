@@ -289,9 +289,9 @@ export default function MarketListsManager() {
                           fontSize: '0.68rem',
                           padding: '0.15rem 0.45rem',
                           borderRadius: '999px',
-                          background: 'rgba(59, 130, 246, 0.15)',
-                          color: '#3b82f6',
-                          fontWeight: 600,
+                          background: 'var(--accent-secondary-glow)',
+                          color: 'var(--accent-secondary)',
+                          fontWeight: 700,
                         }}
                         title="Sincronizada con RecipeVault"
                       >
