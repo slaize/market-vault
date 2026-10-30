@@ -38,6 +38,8 @@ describe('MarketActiveList Component', () => {
         updated_at: new Date().toISOString(),
       },
     ])
+    vi.mocked(marketDb.getFrequentProducts).mockResolvedValue([])
+    vi.mocked(marketDb.getProductSuggestions).mockResolvedValue([])
   })
 
   it('renders active list title and items', async () => {
@@ -97,6 +99,76 @@ describe('MarketActiveList Component', () => {
 
     await waitFor(() => {
       expect(marketDb.toggleLocalItem).toHaveBeenCalledWith('item-1', true)
+    })
+  })
+
+  it('renders frequent product chips and adds a product on chip click', async () => {
+    vi.mocked(marketDb.getFrequentProducts).mockResolvedValue([
+      {
+        name: 'Huevos camperos',
+        name_normalized: 'huevos camperos',
+        category: 'lacteos',
+        default_unit: 'docena',
+        count: 5,
+        last_used: new Date().toISOString(),
+      },
+    ])
+    vi.mocked(marketDb.saveLocalItem).mockResolvedValue({
+      id: 'item-h',
+      list_id: 'list-1',
+      name: 'Huevos camperos',
+      quantity: 1,
+      unit: 'docena',
+      category: 'lacteos',
+      is_checked: false,
+      sort_order: 2,
+      updated_at: new Date().toISOString(),
+    })
+
+    render(<MarketActiveList />)
+    await waitFor(() => screen.getByText('Huevos camperos'))
+
+    const chip = screen.getByText('Huevos camperos')
+    fireEvent.click(chip)
+
+    await waitFor(() => {
+      expect(marketDb.saveLocalItem).toHaveBeenCalledWith(
+        expect.objectContaining({
+          list_id: 'list-1',
+          name: 'Huevos camperos',
+        })
+      )
+    })
+  })
+
+  it('shows autocomplete suggestions dropdown when typing and selects on click', async () => {
+    vi.mocked(marketDb.getProductSuggestions).mockResolvedValue([
+      {
+        name: 'Leche entera',
+        name_normalized: 'leche entera',
+        category: 'lacteos',
+        default_unit: 'l',
+        count: 4,
+        last_used: new Date().toISOString(),
+      },
+    ])
+
+    render(<MarketActiveList />)
+    await waitFor(() => screen.getByPlaceholderText(/Añadir producto.../i))
+
+    const input = screen.getByPlaceholderText(/Añadir producto.../i)
+    fireEvent.change(input, { target: { value: 'Lec' } })
+
+    await waitFor(() => {
+      expect(screen.getByTestId('product-suggestions-dropdown')).toBeInTheDocument()
+      expect(screen.getByText('Leche entera')).toBeInTheDocument()
+    })
+
+    const suggestionItem = screen.getByText('Leche entera')
+    fireEvent.click(suggestionItem)
+
+    await waitFor(() => {
+      expect(input).toHaveValue('Leche entera')
     })
   })
 })

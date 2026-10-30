@@ -31,8 +31,54 @@ export interface MarketSettings {
   last_synced_at: string | null
 }
 
+export interface ProductHistoryItem {
+  name: string
+  name_normalized: string
+  category: ShoppingCategory
+  default_unit?: string | null
+  count: number
+  last_used: string
+}
+
+export const COMMON_STAPLES: Array<{ name: string; category: ShoppingCategory; default_unit?: string }> = [
+  { name: 'Leche entera', category: 'lacteos', default_unit: 'l' },
+  { name: 'Leche desnatada', category: 'lacteos', default_unit: 'l' },
+  { name: 'Huevos camperos', category: 'lacteos', default_unit: 'docena' },
+  { name: 'Pan de barra', category: 'cereales-pan', default_unit: 'barras' },
+  { name: 'Pan de molde', category: 'cereales-pan' },
+  { name: 'Aceite de oliva virgen extra', category: 'despensa', default_unit: 'l' },
+  { name: 'Plátanos de Canarias', category: 'frutas-verduras', default_unit: 'kg' },
+  { name: 'Tomates', category: 'frutas-verduras', default_unit: 'kg' },
+  { name: 'Cebollas', category: 'frutas-verduras', default_unit: 'kg' },
+  { name: 'Patatas', category: 'frutas-verduras', default_unit: 'kg' },
+  { name: 'Ajos', category: 'frutas-verduras', default_unit: 'cabeza' },
+  { name: 'Pechuga de pollo', category: 'carniceria', default_unit: 'kg' },
+  { name: 'Carne picada', category: 'carniceria', default_unit: 'g' },
+  { name: 'Arroz', category: 'cereales-pan', default_unit: 'kg' },
+  { name: 'Pasta / Espaguetis', category: 'cereales-pan', default_unit: 'paquete' },
+  { name: 'Café', category: 'bebidas', default_unit: 'paquete' },
+  { name: 'Azúcar', category: 'despensa', default_unit: 'kg' },
+  { name: 'Mantequilla', category: 'lacteos', default_unit: 'g' },
+  { name: 'Queso rallado', category: 'lacteos', default_unit: 'bolsa' },
+  { name: 'Yogures naturales', category: 'lacteos', default_unit: 'pack' },
+  { name: 'Atún en lata', category: 'despensa', default_unit: 'latas' },
+  { name: 'Tomate frito', category: 'despensa', default_unit: 'brik' },
+  { name: 'Papel higiénico', category: 'otros', default_unit: 'rollo' },
+  { name: 'Detergente lavadora', category: 'otros', default_unit: 'botella' },
+  { name: 'Cerveza', category: 'bebidas', default_unit: 'pack' },
+  { name: 'Agua mineral', category: 'bebidas', default_unit: 'botella' },
+]
+
+export function normalizeProductText(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+}
+
 const DB_NAME = 'marketvault_local_v1'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -53,6 +99,11 @@ function openDb(): Promise<IDBDatabase> {
       }
       if (!db.objectStoreNames.contains('settings')) {
         db.createObjectStore('settings', { keyPath: 'key' })
+      }
+      if (!db.objectStoreNames.contains('product_history')) {
+        const pStore = db.createObjectStore('product_history', { keyPath: 'name_normalized' })
+        pStore.createIndex('count', 'count')
+        pStore.createIndex('last_used', 'last_used')
       }
     }
     req.onsuccess = () => resolve(req.result)
@@ -187,7 +238,10 @@ export async function saveLocalItem(
   return new Promise((resolve, reject) => {
     const tx = db.transaction('items', 'readwrite')
     tx.objectStore('items').put(item)
-    tx.oncomplete = () => resolve(item)
+    tx.oncomplete = () => {
+      recordProductHistory(cleanName, item.category, item.unit).catch(() => {})
+      resolve(item)
+    }
     tx.onerror = () => reject(tx.error)
   })
 }
@@ -289,4 +343,166 @@ export async function saveMarketSettings(settings: Partial<MarketSettings>): Pro
     tx.oncomplete = () => resolve(updated)
     tx.onerror = () => reject(tx.error)
   })
+}
+
+export async function recordProductHistory(
+  name: string,
+  category?: ShoppingCategory,
+  unit?: string | null
+): Promise<ProductHistoryItem | null> {
+  const cleanName = name.trim()
+  if (!cleanName) return null
+  const normalized = normalizeProductText(cleanName)
+
+  try {
+    const db = await openDb()
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('product_history', 'readwrite')
+      const store = tx.objectStore('product_history')
+      const req = store.get(normalized)
+
+      req.onsuccess = () => {
+        const existing = req.result as ProductHistoryItem | undefined
+        const now = new Date().toISOString()
+        const resolvedCategory = category || existing?.category || (categorize(cleanName) as ShoppingCategory)
+        const resolvedUnit = unit !== undefined ? unit : (existing?.default_unit || null)
+
+        const updated: ProductHistoryItem = {
+          name: existing?.name || cleanName,
+          name_normalized: normalized,
+          category: resolvedCategory,
+          default_unit: resolvedUnit,
+          count: (existing?.count || 0) + 1,
+          last_used: now,
+        }
+
+        store.put(updated)
+        tx.oncomplete = () => resolve(updated)
+      }
+
+      req.onerror = () => reject(req.error)
+      tx.onerror = () => reject(tx.error)
+    })
+  } catch {
+    return null
+  }
+}
+
+export async function getProductSuggestions(
+  query = '',
+  limit = 8
+): Promise<ProductHistoryItem[]> {
+  try {
+    const db = await openDb()
+    const userHistory: ProductHistoryItem[] = await new Promise((resolve, reject) => {
+      const tx = db.transaction('product_history', 'readonly')
+      const store = tx.objectStore('product_history')
+      const req = store.getAll()
+      req.onsuccess = () => resolve((req.result as ProductHistoryItem[]) || [])
+      req.onerror = () => reject(req.error)
+    })
+
+    const historyMap = new Map<string, ProductHistoryItem>()
+    for (const item of userHistory) {
+      historyMap.set(item.name_normalized, item)
+    }
+
+    // Blend in common staples if not yet in user history
+    for (const staple of COMMON_STAPLES) {
+      const norm = normalizeProductText(staple.name)
+      if (!historyMap.has(norm)) {
+        historyMap.set(norm, {
+          name: staple.name,
+          name_normalized: norm,
+          category: staple.category,
+          default_unit: staple.default_unit || null,
+          count: 0,
+          last_used: '',
+        })
+      }
+    }
+
+    const all = Array.from(historyMap.values())
+    const qNorm = normalizeProductText(query)
+
+    const filtered = qNorm
+      ? all.filter(
+          (item) =>
+            item.name_normalized.includes(qNorm) ||
+            normalizeProductText(item.name).includes(qNorm)
+        )
+      : all
+
+    filtered.sort((a, b) => {
+      // 1. Exact or prefix match prioritized when query is present
+      if (qNorm) {
+        const aPrefix = a.name_normalized.startsWith(qNorm) ? 1 : 0
+        const bPrefix = b.name_normalized.startsWith(qNorm) ? 1 : 0
+        if (aPrefix !== bPrefix) return bPrefix - aPrefix
+      }
+      // 2. Frequency of use (highest count first)
+      if (b.count !== a.count) return b.count - a.count
+      // 3. Recency of use
+      if (b.last_used && a.last_used && b.last_used !== a.last_used) {
+        return b.last_used.localeCompare(a.last_used)
+      }
+      // 4. Alphabetical
+      return a.name.localeCompare(b.name, 'es')
+    })
+
+    return filtered.slice(0, limit)
+  } catch {
+    return []
+  }
+}
+
+export async function getFrequentProducts(limit = 6): Promise<ProductHistoryItem[]> {
+  try {
+    const db = await openDb()
+    const userHistory: ProductHistoryItem[] = await new Promise((resolve, reject) => {
+      const tx = db.transaction('product_history', 'readonly')
+      const store = tx.objectStore('product_history')
+      const req = store.getAll()
+      req.onsuccess = () => resolve((req.result as ProductHistoryItem[]) || [])
+      req.onerror = () => reject(req.error)
+    })
+
+    userHistory.sort((a, b) => {
+      if (b.count !== a.count) return b.count - a.count
+      return b.last_used.localeCompare(a.last_used)
+    })
+
+    const result = userHistory.filter((i) => i.count > 0).slice(0, limit)
+
+    // If fewer than requested limit, pad with top staples
+    if (result.length < limit) {
+      const existingNorms = new Set(result.map((r) => r.name_normalized))
+      for (const staple of COMMON_STAPLES) {
+        const norm = normalizeProductText(staple.name)
+        if (!existingNorms.has(norm)) {
+          result.push({
+            name: staple.name,
+            name_normalized: norm,
+            category: staple.category,
+            default_unit: staple.default_unit || null,
+            count: 0,
+            last_used: '',
+          })
+          existingNorms.add(norm)
+          if (result.length >= limit) break
+        }
+      }
+    }
+
+    return result
+  } catch {
+    return COMMON_STAPLES.slice(0, limit).map((s) => ({
+      name: s.name,
+      name_normalized: normalizeProductText(s.name),
+      category: s.category,
+      default_unit: s.default_unit || null,
+      count: 0,
+      last_used: '',
+    }))
+  }
 }

@@ -12,6 +12,9 @@ import {
   saveMarketSettings,
   updateLocalListName,
   findLocalListByRemoteId,
+  recordProductHistory,
+  getProductSuggestions,
+  getFrequentProducts,
 } from './market-db'
 
 // Polyfill in-memory IndexedDB for jsdom environment if not provided
@@ -274,5 +277,29 @@ describe('MarketVault Local-First IndexedDB Engine', () => {
 
     const notFound = await findLocalListByRemoteId('unknown')
     expect(notFound).toBeNull()
+  })
+
+  it('records product history and retrieves suggestions based on frequency and query', async () => {
+    await recordProductHistory('Leche de avena', 'lacteos', 'l')
+    await recordProductHistory('Leche entera', 'lacteos', 'l')
+    await recordProductHistory('Leche entera', 'lacteos', 'l') // count 2
+    await recordProductHistory('Plátanos de Canarias', 'frutas-verduras', 'kg')
+
+    // Suggestions matching "leche"
+    const suggestions = await getProductSuggestions('leche')
+    expect(suggestions.length).toBeGreaterThanOrEqual(2)
+    // Most frequent first
+    expect(suggestions[0].name).toBe('Leche entera')
+    expect(suggestions[0].count).toBe(2)
+    expect(suggestions[1].name).toBe('Leche de avena')
+
+    // Suggestions matching "platano" (accent-insensitive)
+    const fruitSuggestions = await getProductSuggestions('platano')
+    expect(fruitSuggestions.some((s) => s.name.includes('Plátanos'))).toBe(true)
+
+    // Frequent products returns top products
+    const frequent = await getFrequentProducts(3)
+    expect(frequent.length).toBeGreaterThanOrEqual(2)
+    expect(frequent[0].name).toBe('Leche entera')
   })
 })

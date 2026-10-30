@@ -12,8 +12,11 @@ import {
   getMarketSettings,
   saveMarketSettings,
   updateLocalListName,
+  getProductSuggestions,
+  getFrequentProducts,
   type MarketList,
   type MarketItem,
+  type ProductHistoryItem,
 } from '@/lib/market-db'
 import {
   syncActiveListWithRemote,
@@ -38,6 +41,9 @@ export default function MarketActiveList() {
   const [activeList, setActiveList] = useState<MarketList | null>(null)
   const [items, setItems] = useState<MarketItem[]>([])
   const [newItemName, setNewItemName] = useState('')
+  const [frequentProducts, setFrequentProducts] = useState<ProductHistoryItem[]>([])
+  const [suggestions, setSuggestions] = useState<ProductHistoryItem[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
   const [showCheckedSection, setShowCheckedSection] = useState(false)
   const [loading, setLoading] = useState(true)
   const [isSyncing, setIsSyncing] = useState(false)
@@ -75,6 +81,9 @@ export default function MarketActiveList() {
       const listItems = await getLocalItems(current.id)
       setItems(listItems)
 
+      // Load frequent products
+      getFrequentProducts(8).then(setFrequentProducts)
+
       // Background sync if paired
       if (settings.sync_mode === 'paired_household' && settings.paired_token) {
         syncActiveListWithRemote().then((res) => {
@@ -91,6 +100,26 @@ export default function MarketActiveList() {
   useEffect(() => {
     loadData()
   }, [loadData])
+
+  // Live suggestions query
+  useEffect(() => {
+    const q = newItemName.trim()
+    if (q.length >= 1) {
+      let active = true
+      getProductSuggestions(q, 6).then((res) => {
+        if (active) {
+          setSuggestions(res)
+          setShowSuggestions(res.length > 0)
+        }
+      })
+      return () => {
+        active = false
+      }
+    } else {
+      setSuggestions([])
+      setShowSuggestions(false)
+    }
+  }, [newItemName])
 
   const handleManualSync = async () => {
     if (isSyncing || !activeList) return
@@ -120,11 +149,38 @@ export default function MarketActiveList() {
     setItems(listItems)
   }
 
+  const handleAddProductDirectly = async (
+    name: string,
+    category?: ShoppingCategory,
+    unit?: string | null
+  ) => {
+    if (!activeList) return
+    const saved = await saveLocalItem({
+      list_id: activeList.id,
+      name,
+      category,
+      unit,
+      quantity: unit ? 1 : null,
+    })
+    setItems((prev) => [...prev, saved])
+    showToast(`«${name}» añadido`)
+    getFrequentProducts(8).then(setFrequentProducts)
+
+    if (isPaired && pairedToken) {
+      remoteAddItem({
+        name,
+        quantity: unit ? 1 : null,
+        unit: unit ?? null,
+      })
+    }
+  }
+
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault()
     const clean = newItemName.trim()
     if (!clean || !activeList) return
     setNewItemName('')
+    setShowSuggestions(false)
 
     const parsed = parseItemInput(clean)
     const saved = await saveLocalItem({
@@ -135,6 +191,7 @@ export default function MarketActiveList() {
       category: parsed.category,
     })
     setItems((prev) => [...prev, saved])
+    getFrequentProducts(8).then(setFrequentProducts)
 
     // Background sync to remote if paired
     if (isPaired && pairedToken) {
@@ -402,23 +459,129 @@ export default function MarketActiveList() {
       </header>
 
       {/* Quick Add Form */}
-      <form onSubmit={handleAddItem} style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }}>
-        <input
-          type="text"
-          value={newItemName}
-          onChange={(e) => setNewItemName(e.target.value)}
-          placeholder="Añadir producto... (ej: Plátanos 1kg)"
-          style={{
-            flex: 1,
-            padding: '0.75rem 0.95rem',
-            borderRadius: 'var(--radius-md)',
-            background: 'var(--input-bg)',
-            border: '1px solid var(--border-default)',
-            color: 'var(--text-primary)',
-            fontSize: '1rem',
-            outline: 'none',
-          }}
-        />
+      <form
+        onSubmit={handleAddItem}
+        style={{
+          position: 'relative',
+          display: 'flex',
+          gap: '0.5rem',
+          marginBottom: frequentProducts.length > 0 ? '0.65rem' : '1.25rem',
+        }}
+      >
+        <div style={{ position: 'relative', flex: 1 }}>
+          <input
+            type="text"
+            value={newItemName}
+            onChange={(e) => setNewItemName(e.target.value)}
+            onFocus={() => {
+              if (suggestions.length > 0) setShowSuggestions(true)
+            }}
+            placeholder="Añadir producto... (ej: Plátanos 1kg)"
+            style={{
+              width: '100%',
+              padding: '0.75rem 0.95rem',
+              borderRadius: 'var(--radius-md)',
+              background: 'var(--input-bg)',
+              border: '1px solid var(--border-default)',
+              color: 'var(--text-primary)',
+              fontSize: '1rem',
+              outline: 'none',
+            }}
+          />
+
+          {/* Autocomplete Suggestions Dropdown */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div
+              data-testid="product-suggestions-dropdown"
+              style={{
+                position: 'absolute',
+                top: 'calc(100% + 4px)',
+                left: 0,
+                right: 0,
+                zIndex: 60,
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-default)',
+                borderRadius: 'var(--radius-md)',
+                boxShadow: '0 12px 28px rgba(0, 0, 0, 0.45), 0 4px 10px rgba(0, 0, 0, 0.25)',
+                overflow: 'hidden',
+                maxHeight: '260px',
+                overflowY: 'auto',
+              }}
+            >
+              {suggestions.map((sug) => {
+                const emoji = getIngredientEmoji(sug.name, sug.category)
+                return (
+                  <div
+                    key={sug.name_normalized}
+                    onClick={() => {
+                      setNewItemName(sug.name)
+                      setShowSuggestions(false)
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.65rem 0.85rem',
+                      borderBottom: '1px solid var(--border-subtle)',
+                      cursor: 'pointer',
+                      transition: 'background 0.12s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'var(--bg-glass-hover)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'transparent'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', minWidth: 0, flex: 1 }}>
+                      <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{emoji}</span>
+                      <strong
+                        style={{
+                          fontSize: '0.9rem',
+                          color: 'var(--text-primary)',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {sug.name}
+                      </strong>
+                      {sug.default_unit && (
+                        <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                          ({sug.default_unit})
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleAddProductDirectly(sug.name, sug.category, sug.default_unit)
+                        setNewItemName('')
+                        setShowSuggestions(false)
+                      }}
+                      className="btn btn-ghost"
+                      style={{
+                        fontSize: '0.75rem',
+                        padding: '0.2rem 0.6rem',
+                        borderRadius: '999px',
+                        background: 'var(--accent-glow)',
+                        color: 'var(--accent-primary)',
+                        fontWeight: 700,
+                        minHeight: '28px',
+                        marginLeft: '0.5rem',
+                      }}
+                      title={`Añadir ${sug.name}`}
+                    >
+                      + Añadir
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
         <button
           type="submit"
           className="btn btn-primary"
@@ -432,6 +595,69 @@ export default function MarketActiveList() {
           + Añadir
         </button>
       </form>
+
+      {/* Frequent products quick chips */}
+      {frequentProducts.length > 0 && (
+        <div style={{ marginBottom: '1.25rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '0.45rem',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                color: 'var(--text-muted)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
+              ⚡ Habituales
+            </span>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              gap: '0.45rem',
+              overflowX: 'auto',
+              paddingBottom: '0.35rem',
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'none',
+            }}
+          >
+            {frequentProducts.map((p) => (
+              <button
+                key={p.name_normalized}
+                type="button"
+                onClick={() => handleAddProductDirectly(p.name, p.category, p.default_unit)}
+                className="btn btn-ghost"
+                style={{
+                  flexShrink: 0,
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  padding: '0.35rem 0.75rem',
+                  borderRadius: '999px',
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border-default)',
+                  color: 'var(--text-primary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  whiteSpace: 'nowrap',
+                }}
+                title={`Añadir ${p.name}`}
+              >
+                <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>+</span>
+                <span>{p.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Empty State: 0 items total */}
       {items.length === 0 && (
