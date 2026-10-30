@@ -45,15 +45,101 @@ export const CATEGORY_ORDER: ShoppingCategory[] = [
 ]
 
 export const INGREDIENT_EMOJI_MAP: Record<string, string> = {
+  // Aceites y Aceitunas
   'aceite de oliva': '/icons/oil.png',
   'aceite': '/icons/oil.png',
   'olive oil': '/icons/oil.png',
   'oil': '/icons/oil.png',
+  'aceituna': '🫒',
+  'aceitunas': '🫒',
+  'oliva': '🫒',
+  'olivas': '🫒',
+
+  // Limpieza y Hogar (evita que 'vinagre de limpieza' use 🍾 de champán)
+  'vinagre de limpieza': '🧴',
+  'papel de horno': '📜',
+  'papel vegetal': '📜',
+  'papel de aluminio': '🧻',
+  'papel albal': '🧻',
+  'albal': '🧻',
+  'film transparente': '🧻',
+  'papel film': '🧻',
+  'papel higiénico': '🧻',
+  'papel higienico': '🧻',
+  'papel de cocina': '🧻',
+  'servilletas': '🧻',
+  'friegaplatos': '🧴',
+  'lavavajillas': '🧴',
+  'detergente': '🧴',
+  'lejía': '🧴',
+  'lejia': '🧴',
+  'suavizante': '🧴',
+  'fregasuelos': '🧴',
+  'limpieza': '🧴',
+  'estropajo': '🧽',
+  'bayeta': '🧽',
+  'jabón': '🧼',
+  'jabon': '🧼',
+
+  // Salsas y Condimentos (declaradas antes de 'sal' para evitar falsos positivos con 'salsa')
+  'salsa bbq': '🥫',
+  'barbacoa': '🥫',
+  'salsa': '🥫',
+  'kétchup': '🥫',
+  'ketchup': '🥫',
+  'mostaza': '🥫',
+  'mayonesa': '🥫',
+  'mahonesa': '🥫',
+  'alioli': '🥫',
+  'soja': '🥫',
   'vinagre': '🍾',
+
+  // Sales y Especias
+  'sal de ajo': '🧂',
+  'sal gorda': '🧂',
+  'sal marina': '🧂',
+  'sal fina': '🧂',
   'sal': '🧂',
   'pimienta': '🧂',
+  'canela': '🧂',
+  'comino': '🧂',
+  'pimentón': '🧂',
+  'pimenton': '🧂',
+  'curry': '🧂',
+  'cúrcuma': '🧂',
+  'curcuma': '🧂',
+  'nuez moscada': '🧂',
+  'clavo': '🧂',
+  'azafrán': '🧂',
+  'azafran': '🧂',
+
+  // Hierbas aromáticas
+  'tomillo': '🌿',
+  'romero': '🌿',
+  'eneldo': '🌿',
+  'albahaca': '🌿',
+  'perejil': '🌿',
+  'cilantro': '🌿',
+  'orégano': '🌿',
+  'oregano': '🌿',
+  'laurel': '🌿',
+  'hierbabuena': '🌿',
+  'menta': '🌿',
+  'hierba': '🌿',
+  'hierbas': '🌿',
+
+  // Dulces y Postres
+  'helados': '🍨',
+  'helado': '🍨',
   'azúcar': '🍬',
+  'azucar': '🍬',
   'miel': '🍯',
+  'sirope': '🍯',
+  'chocolate': '🍫',
+  'cacao': '🍫',
+  'galletas': '🍪',
+
+  // Frutas y Verduras
   'ajo': '🧄',
   'cebolla': '🧅',
   'tomate': '🍅',
@@ -64,45 +150,63 @@ export const INGREDIENT_EMOJI_MAP: Record<string, string> = {
   'espinaca': '🥬',
   'acelga': '🥬',
   'brócoli': '🥦',
+  'brocoli': '🥦',
   'coliflor': '🥦',
   'pimiento': '🫑',
   'calabacín': '🥒',
+  'calabacin': '🥒',
   'pepino': '🥒',
   'berenjena': '🍆',
   'aguacate': '🥑',
   'champiñón': '🍄',
+  'champinon': '🍄',
   'seta': '🍄',
   'limón': '🍋',
+  'limon': '🍋',
   'lima': '🍋',
   'naranja': '🍊',
   'manzana': '🍎',
   'pera': '🍐',
   'plátano': '🍌',
+  'platano': '🍌',
   'fresa': '🍓',
   'kiwi': '🥝',
   'melocotón': '🍑',
+  'melocoton': '🍑',
   'uva': '🍇',
   'cereza': '🍒',
+
+  // Lácteos y Huevos
+  'philadelphia': '🧀',
+  'queso crema': '🧀',
+  'queso': '🧀',
   'huevo': '🥚',
   'huevos': '🥚',
-  'queso': '🧀',
   'leche': '🥛',
   'yogur': '🥛',
   'mantequilla': '🧈',
   'nata': '🥛',
+
+  // Carnicería y Charcutería
   'pollo': '🍗',
   'pavo': '🍗',
-  'ternera': '🥩',
-  'cerdo': '🥩',
-  'carne': '🥩',
+  'fuet': '🥓',
   'jamón': '🥓',
+  'jamon': '🥓',
   'bacon': '🥓',
   'panceta': '🥓',
   'salchicha': '🌭',
   'chorizo': '🌭',
+  'ternera': '🥩',
+  'cerdo': '🥩',
+  'carne': '🥩',
+
+  // Pescadería
   'pescado': '🐟',
   'atún': '🐟',
+  'atun': '🐟',
   'salmón': '🐟',
+  'salmon': '🐟',
   'sardina': '🐟',
   'dorada': '🐟',
   'lubina': '🐟',
@@ -112,31 +216,44 @@ export const INGREDIENT_EMOJI_MAP: Record<string, string> = {
   'pulpo': '🐙',
   'calamar': '🦑',
   'mejillón': '🦪',
+  'mejillon': '🦪',
   'almeja': '🦪',
-  'arroz': '🍚',
+
+  // Panadería, Harinas, Pastas y Granos
+  'pan burger': '🍔',
+  'burger': '🍔',
+  'pan de molde': '🍞',
   'pan': '🍞',
-  'harina': '🌾',
-  'pasta': '🍝',
+  'spatze': '🍝',
+  'spaetzle': '🍝',
+  'spätzle': '🍝',
   'espagueti': '🍝',
   'macarrón': '🍝',
+  'macarron': '🍝',
   'fideos': '🍝',
-  'quinoa': '🌾',
+  'pasta': '🍝',
+  'harina': '🌾',
+  'arroz': '🍚',
   'avena': '🌾',
+  'quinoa': '🌾',
   'lentejas': '🫘',
   'garbanzos': '🫘',
   'alubias': '🫘',
   'judías': '🫘',
+  'judias': '🫘',
   'guisantes': '🫛',
+
+  // Bebidas
   'café': '☕',
+  'cafe': '☕',
   'té': '🍵',
-  'chocolate': '🍫',
-  'cacao': '🍫',
+  'te': '🍵',
   'cerveza': '🍺',
   'vino': '🍷',
   'refresco': '🥤',
   'agua': '💧',
-  'pan de molde': '🍞',
-  'galletas': '🍪',
+
+  // Frutos secos
   'nuez': '🥜',
   'almendra': '🥜',
   'cacahuete': '🥜',
@@ -145,11 +262,23 @@ export const INGREDIENT_EMOJI_MAP: Record<string, string> = {
 
 export function getIngredientEmoji(name: string, category: string): string {
   const normalized = name.toLowerCase().trim()
+  const unaccented = normalized.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+
   for (const [keyword, emoji] of Object.entries(INGREDIENT_EMOJI_MAP)) {
-    if (normalized.includes(keyword)) {
-      return emoji
+    const kNorm = keyword.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    // Para palabras cortas (< 4 letras sin espacio, como 'sal', 'pan', 'te') requerimos límite de palabra (\b) para no confundir 'sal' con 'salsa'
+    if (kNorm.length < 4 && !kNorm.includes(' ')) {
+      const rx = new RegExp(`\\b${kNorm}\\b`, 'i')
+      if (rx.test(normalized) || rx.test(unaccented)) {
+        return emoji
+      }
+    } else {
+      if (normalized.includes(keyword) || unaccented.includes(kNorm)) {
+        return emoji
+      }
     }
   }
+
   const cat = category as ShoppingCategory
   return CATEGORY_LABELS[cat]?.emoji ?? '🛒'
 }
@@ -157,14 +286,14 @@ export function getIngredientEmoji(name: string, category: string): string {
 // ── Categorization ─────────────────────────────────────────────
 
 const CATEGORY_MAP: [ShoppingCategory, string[]][] = [
-  ['carniceria', ['pollo', 'pechuga', 'muslo', 'ternera', 'cerdo', 'carne', 'filete', 'lomo', 'jamón', 'bacon', 'panceta', 'chorizo', 'salchicha', 'buey', 'cordero', 'chuletón', 'hamburguesa', 'alita']],
-  ['pescaderia', ['pescado', 'merluza', 'bacalao', 'atún', 'salmón', 'sardina', 'dorada', 'lubina', 'gamba', 'langostino', 'pulpo', 'calamar', 'mejillón', 'almeja', 'marisco', 'anchoa']],
-  ['frutas-verduras', ['tomate', 'cebolla', 'ajo', 'zanahoria', 'patata', 'papa', 'lechuga', 'espinaca', 'pimiento', 'brócoli', 'calabacín', 'berenjena', 'champiñón', 'seta', 'puerro', 'apio', 'pepino', 'manzana', 'naranja', 'limón', 'plátano', 'fresa', 'aguacate', 'verdura', 'fruta', 'kiwi', 'pera', 'melocotón']],
-  ['lacteos', ['leche', 'queso', 'yogur', 'mantequilla', 'nata', 'crema', 'mozzarella', 'parmesano', 'cheddar', 'feta', 'ricotta', 'kéfir', 'nata']],
-  ['cereales-pan', ['harina', 'pan', 'pasta', 'arroz', 'avena', 'cereales', 'espagueti', 'macarrón', 'fideos', 'lasaña', 'cous-cous', 'quinoa', 'pan de molde', 'galletas', 'levadura']],
-  ['despensa', ['aceite', 'sal', 'azúcar', 'vinagre', 'salsa', 'ketchup', 'mostaza', 'mayonesa', 'soja', 'pimienta', 'orégano', 'comino', 'pimentón', 'canela', 'laurel', 'especia', 'hierba', 'caldo', 'tomate frito', 'conserva', 'lata', 'almendra', 'nuez', 'avellana', 'cacahuete', 'miel', 'mermelada', 'chocolate', 'cacao']],
-  ['bebidas', ['agua', 'zumo', 'refresco', 'cerveza', 'vino', 'leche vegetal', 'café', 'té', 'alcohol']],
-  ['congelados', ['helado', 'congelado', 'guisante congelado', 'espinaca congelada']],
+  ['carniceria', ['pollo', 'pechuga', 'muslo', 'ternera', 'cerdo', 'carne', 'filete', 'lomo', 'jamón', 'jamon', 'bacon', 'panceta', 'chorizo', 'salchicha', 'fuet', 'buey', 'cordero', 'chuletón', 'chuleton', 'hamburguesa', 'alita']],
+  ['pescaderia', ['pescado', 'merluza', 'bacalao', 'atún', 'atun', 'salmón', 'salmon', 'sardina', 'dorada', 'lubina', 'gamba', 'langostino', 'pulpo', 'calamar', 'mejillón', 'mejillon', 'almeja', 'marisco', 'anchoa']],
+  ['frutas-verduras', ['tomate', 'cebolla', 'ajo', 'zanahoria', 'patata', 'papa', 'lechuga', 'espinaca', 'pimiento', 'brócoli', 'brocoli', 'calabacín', 'calabacin', 'berenjena', 'champiñón', 'champinon', 'seta', 'puerro', 'apio', 'pepino', 'manzana', 'naranja', 'limón', 'limon', 'plátano', 'platano', 'fresa', 'aguacate', 'verdura', 'fruta', 'kiwi', 'pera', 'melocotón', 'melocoton']],
+  ['lacteos', ['leche', 'queso', 'philadelphia', 'yogur', 'mantequilla', 'nata', 'crema', 'mozzarella', 'parmesano', 'cheddar', 'feta', 'ricotta', 'kéfir', 'kefir', 'huevo', 'huevos']],
+  ['cereales-pan', ['harina', 'pan', 'pasta', 'spatze', 'spaetzle', 'spätzle', 'arroz', 'avena', 'cereales', 'espagueti', 'macarrón', 'macarron', 'fideos', 'lasaña', 'lasana', 'cous-cous', 'quinoa', 'pan de molde', 'galletas', 'levadura', 'burger']],
+  ['despensa', ['aceite', 'aceituna', 'aceitunas', 'oliva', 'olivas', 'sal', 'azúcar', 'azucar', 'vinagre', 'salsa', 'ketchup', 'kétchup', 'mostaza', 'mayonesa', 'mahonesa', 'soja', 'pimienta', 'orégano', 'oregano', 'comino', 'pimentón', 'pimenton', 'canela', 'laurel', 'tomillo', 'romero', 'eneldo', 'albahaca', 'perejil', 'cilantro', 'especia', 'hierba', 'caldo', 'tomate frito', 'conserva', 'lata', 'almendra', 'nuez', 'avellana', 'cacahuete', 'miel', 'mermelada', 'chocolate', 'cacao']],
+  ['bebidas', ['agua', 'zumo', 'refresco', 'cerveza', 'vino', 'leche vegetal', 'café', 'cafe', 'té', 'te', 'alcohol']],
+  ['congelados', ['helado', 'helados', 'congelado', 'guisante congelado', 'espinaca congelada']],
 ]
 
 /**
@@ -181,22 +310,32 @@ const CATEGORY_MAP: [ShoppingCategory, string[]][] = [
  */
 export function categorize(name: string): ShoppingCategory {
   const n = name.toLowerCase()
+  const nClean = n.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 
   // Especias secas, extractos y condimentos deshidratados van a despensa
   if (
-    n.includes('en polvo') ||
-    n.includes('molido') ||
-    n.includes('molida') ||
-    n.includes('seco') ||
-    n.includes('seca') ||
-    n.includes('extracto') ||
-    n.includes('colorante')
+    nClean.includes('en polvo') ||
+    nClean.includes('molido') ||
+    nClean.includes('molida') ||
+    nClean.includes('seco') ||
+    nClean.includes('seca') ||
+    nClean.includes('extracto') ||
+    nClean.includes('colorante')
   ) {
     return 'despensa'
   }
 
   for (const [cat, keywords] of CATEGORY_MAP) {
-    if (keywords.some((k) => n.includes(k))) return cat
+    if (keywords.some((k) => {
+      const kClean = k.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      if (kClean.length < 4 && !kClean.includes(' ')) {
+        const rx = new RegExp(`\\b${kClean}\\b`, 'i')
+        return rx.test(nClean)
+      }
+      return nClean.includes(kClean)
+    })) {
+      return cat
+    }
   }
   return 'otros'
 }
