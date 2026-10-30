@@ -1,88 +1,61 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <!-- Background Emerald Gradient -->
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="bgEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#10B981" />
       <stop offset="45%" stop-color="#059669" />
       <stop offset="100%" stop-color="#044E3B" />
     </linearGradient>
-
-    <!-- Inner Ambient Light -->
-    <radialGradient id="ambientLight" cx="30%" cy="20%" r="70%">
-      <stop offset="0%" stop-color="#34D399" stop-opacity="0.35" />
+    <radialGradient id="lightGlow" cx="25%" cy="20%" r="70%">
+      <stop offset="0%" stop-color="#34D399" stop-opacity="0.3" />
       <stop offset="100%" stop-color="#044E3B" stop-opacity="0" />
     </radialGradient>
-
-    <!-- RecipeVault Burgundy Badge Gradient -->
-    <linearGradient id="rvBadgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#A21D44" />
+    <filter id="mainShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="14" flood-color="#022c22" flood-opacity="0.55" />
+    </filter>
+    <linearGradient id="burgundyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9E1840" />
       <stop offset="100%" stop-color="#5B0E24" />
     </linearGradient>
-
-    <!-- Gold Accent -->
-    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FDE047" />
-      <stop offset="100%" stop-color="#F59E0B" />
+    <linearGradient id="goldBread" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCD34D" />
+      <stop offset="100%" stop-color="#D97706" />
     </linearGradient>
-
-    <!-- Drop Shadow for Cart -->
-    <filter id="cartShadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="16" stdDeviation="14" flood-color="#022c22" flood-opacity="0.5" />
-    </filter>
-
-    <filter id="badgeShadow" x="-30%" y="-30%" width="160%" height="160%">
-      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.35" />
-    </filter>
   </defs>
+  <rect width="512" height="512" rx="124" fill="url(#bgEmerald)" />
+  <rect width="512" height="512" rx="124" fill="url(#lightGlow)" />
+  <rect x="5" y="5" width="502" height="502" rx="120" fill="none" stroke="rgba(255, 255, 255, 0.25)" stroke-width="3" />
 
-  <!-- 1. Base Icon Rounded Rect -->
-  <rect width="512" height="512" rx="124" fill="url(#bgGrad)" />
-  <rect width="512" height="512" rx="124" fill="url(#ambientLight)" />
-  <!-- Crisp Inner Border / Glass Edge -->
-  <rect x="5" y="5" width="502" height="502" rx="120" fill="none" stroke="rgba(255, 255, 255, 0.28)" stroke-width="3" />
+  <g filter="url(#mainShadow)">
+    <!-- Groceries coming out of bag -->
+    <path d="M190 190 C 170 120, 130 110, 115 125 C 130 155, 165 180, 190 190 Z" fill="#6EE7B7" />
+    <path d="M210 180 C 205 105, 235 85, 255 95 C 250 130, 230 165, 210 180 Z" fill="#34D399" />
 
-  <!-- 2. Groceries Peeking from Cart -->
-  <g filter="url(#cartShadow)">
-    <!-- Fresh Mint / Herb Sprig -->
-    <path d="M210 185 C 190 135, 155 125, 140 135 C 150 160, 180 180, 210 185 Z" fill="#6EE7B7" opacity="0.9" />
-    <path d="M225 175 C 220 120, 245 100, 265 105 C 265 135, 245 165, 225 175 Z" fill="#34D399" />
+    <!-- Baguette -->
+    <rect x="295" y="90" width="52" height="130" rx="26" transform="rotate(25 321 155)" fill="url(#goldBread)" stroke="#B45309" stroke-width="3" />
+    <line x1="318" y1="120" x2="332" y2="135" stroke="#92400E" stroke-width="4.5" stroke-linecap="round" />
+    <line x1="332" y1="150" x2="346" y2="165" stroke="#92400E" stroke-width="4.5" stroke-linecap="round" />
 
-    <!-- Baguette / Bread loaf -->
-    <rect x="290" y="110" width="46" height="110" rx="23" transform="rotate(28 313 165)" fill="#FBBF24" stroke="#D97706" stroke-width="3" />
-    <line x1="310" y1="135" x2="322" y2="148" stroke="#B45309" stroke-width="4" stroke-linecap="round" />
-    <line x1="322" y1="160" x2="334" y2="173" stroke="#B45309" stroke-width="4" stroke-linecap="round" />
+    <!-- Carrot top / greens -->
+    <path d="M375 140 C 400 125, 410 140, 395 160 Z" fill="#34D399" />
+    <path d="M365 155 L 390 185" stroke="#F97316" stroke-width="16" stroke-linecap="round" />
 
-    <!-- 3. The Supermarket Cart (White, Modern, High Contrast) -->
-    <!-- Handle -->
-    <path d="M108 178 L 148 178 L 190 320 L 372 320" fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- The Paper Bag (Warm Kraft Tone with folded top) -->
+    <path d="M145 200 L 367 200 L 350 410 L 162 410 Z" fill="#FDE68A" stroke="#D97706" stroke-width="4" />
+    <!-- Bag Fold / Shadow line -->
+    <path d="M145 200 L 162 410 L 256 410 L 256 200 Z" fill="#F59E0B" opacity="0.25" />
+    <!-- Top serrated / folded edge -->
+    <path d="M145 200 L 165 220 L 195 205 L 225 220 L 256 205 L 285 220 L 315 205 L 345 220 L 367 200" fill="none" stroke="#D97706" stroke-width="5" stroke-linejoin="round" />
 
-    <!-- Basket Body -->
-    <path d="M165 210 L 396 210 L 370 310 L 195 310 Z" fill="rgba(255, 255, 255, 0.15)" stroke="#FFFFFF" stroke-width="20" stroke-linejoin="round" />
-
-    <!-- Basket Grid Inner Slats -->
-    <line x1="225" y1="216" x2="235" y2="304" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" opacity="0.85" />
-    <line x1="285" y1="216" x2="285" y2="304" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" opacity="0.85" />
-    <line x1="345" y1="216" x2="335" y2="304" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" opacity="0.85" />
-
-    <!-- Wheels -->
-    <circle cx="215" cy="382" r="28" fill="#FFFFFF" />
-    <circle cx="215" cy="382" r="14" fill="#044E3B" />
-
-    <circle cx="345" cy="382" r="28" fill="#FFFFFF" />
-    <circle cx="345" cy="382" r="14" fill="#044E3B" />
-  </g>
-
-  <!-- 4. The 'Guiño' (Wink): RecipeVault Burgundy Badge hanging on cart -->
-  <g filter="url(#badgeShadow)">
-    <!-- Tag String -->
-    <path d="M260 212 L 246 250" fill="none" stroke="#FDE047" stroke-width="5" stroke-linecap="round" />
-
-    <!-- Burgundy Round Badge (#8A1538 RecipeVault Color) -->
-    <circle cx="242" cy="275" r="38" fill="url(#rvBadgeGrad)" stroke="#FAF6EE" stroke-width="4.5" />
-
-    <!-- RecipeVault Wink: The Golden Egg -->
-    <path d="M 235 264 C 224 266, 222 278, 230 286 C 238 293, 256 294, 258 284 C 260 274, 248 262, 235 264 Z" fill="#FAF6EE" />
-    <circle cx="243" cy="276" r="10" fill="url(#goldGrad)" />
-    <circle cx="240" cy="273" r="3" fill="#FFFFFF" opacity="0.85" />
+    <!-- Hanging Burgundy Recipe Tag (The Wink) -->
+    <!-- Cord -->
+    <path d="M225 210 Q 235 250 250 265" fill="none" stroke="#FAF6EE" stroke-width="3.5" stroke-dasharray="6,4" />
+    <!-- Tag Rectangle -->
+    <rect x="220" y="260" width="84" height="104" rx="14" transform="rotate(-8 262 312)" fill="url(#burgundyGrad)" stroke="#FAF6EE" stroke-width="3" />
+    <circle cx="262" cy="274" r="5" fill="#FAF6EE" />
+    <!-- Crossed Fork & Spoon silhouette in warm cream -->
+    <!-- Spoon -->
+    <path d="M246 325 L 270 295 C 275 289, 281 292, 280 298 C 278 303, 270 307, 260 333 Z" fill="#FAF6EE" />
+    <!-- Fork -->
+    <path d="M275 325 L 250 295 M 245 292 L 249 297 M 253 290 L 256 295" stroke="#FAF6EE" stroke-width="3" stroke-linecap="round" />
   </g>
 </svg>
