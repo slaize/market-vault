@@ -171,4 +171,34 @@ describe('MarketActiveList Component', () => {
       expect(input).toHaveValue('Leche entera')
     })
   })
+
+  it('renders custom icon image when ingredient emoji is an image path (e.g. /icons/oil.png)', async () => {
+    vi.mocked(marketDb.getProductSuggestions).mockResolvedValue([
+      {
+        name: 'Aceite de oliva virgen extra',
+        name_normalized: 'aceite de oliva virgen extra',
+        category: 'despensa',
+        default_unit: 'l',
+        count: 8,
+        last_used: new Date().toISOString(),
+      },
+    ])
+
+    render(<MarketActiveList />)
+    await waitFor(() => screen.getByPlaceholderText(/Añadir producto.../i))
+
+    const input = screen.getByPlaceholderText(/Añadir producto.../i)
+    fireEvent.change(input, { target: { value: 'Ace' } })
+
+    await waitFor(() => {
+      expect(screen.getByTestId('product-suggestions-dropdown')).toBeInTheDocument()
+      expect(screen.getByText('Aceite de oliva virgen extra')).toBeInTheDocument()
+    })
+
+    // Must NOT render raw text "/icons/oil.png"
+    expect(screen.queryByText('/icons/oil.png')).not.toBeInTheDocument()
+    // Must render an img element with src="/icons/oil.png"
+    const img = document.querySelector('img[src="/icons/oil.png"]')
+    expect(img).toBeInTheDocument()
+  })
 })

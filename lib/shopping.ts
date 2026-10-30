@@ -446,7 +446,8 @@ export function formatShareListText(
       const meta = CATEGORY_LABELS[cat] || { label: cat, emoji: '🛒' }
       lines.push(`${meta.emoji} *${meta.label}*:`)
       for (const item of catItems) {
-        const emoji = getIngredientEmoji(item.name, cat)
+        const rawEmoji = getIngredientEmoji(item.name, cat)
+        const emoji = rawEmoji.startsWith('/') ? (rawEmoji.includes('oil') ? '🫒' : '🥫') : rawEmoji
         const qty = item.quantity ? `${item.quantity}${item.unit ? ' ' + item.unit : ''} ` : ''
         lines.push(`  • ${emoji} ${qty}${item.name}`)
       }

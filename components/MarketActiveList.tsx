@@ -36,6 +36,26 @@ import { UiIcon } from '@/components/icons'
 import EditListNameModal from '@/components/EditListNameModal'
 import ShareListModal from '@/components/ShareListModal'
 
+function renderIngredientIcon(emoji: string, size = '1.25rem') {
+  if (emoji && emoji.startsWith('/')) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={emoji}
+        alt=""
+        style={{
+          width: size,
+          height: size,
+          objectFit: 'contain',
+          display: 'inline-block',
+          verticalAlign: 'middle',
+        }}
+      />
+    )
+  }
+  return emoji || '🛒'
+}
+
 export default function MarketActiveList() {
   const [lists, setLists] = useState<MarketList[]>([])
   const [activeList, setActiveList] = useState<MarketList | null>(null)
@@ -534,7 +554,9 @@ export default function MarketActiveList() {
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', minWidth: 0, flex: 1 }}>
-                      <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{emoji}</span>
+                      <span style={{ fontSize: '1.1rem', flexShrink: 0, display: 'inline-flex', alignItems: 'center' }}>
+                        {renderIngredientIcon(emoji, '1.2rem')}
+                      </span>
                       <strong
                         style={{
                           fontSize: '0.9rem',
@@ -753,7 +775,9 @@ export default function MarketActiveList() {
                         className="market-checkbox"
                         aria-label={`Marcar ${item.name}`}
                       />
-                      <span style={{ fontSize: '1.2rem', flexShrink: 0 }}>{itemEmoji}</span>
+                      <span style={{ fontSize: '1.2rem', flexShrink: 0, display: 'inline-flex', alignItems: 'center' }}>
+                        {renderIngredientIcon(itemEmoji, '1.35rem')}
+                      </span>
                       <span
                         style={{
                           fontSize: '0.95rem',
@@ -866,7 +890,9 @@ export default function MarketActiveList() {
                         className="market-checkbox"
                         aria-label={`Desmarcar ${item.name}`}
                       />
-                      <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{itemEmoji}</span>
+                      <span style={{ fontSize: '1.1rem', flexShrink: 0, opacity: 0.6, display: 'inline-flex', alignItems: 'center' }}>
+                        {renderIngredientIcon(itemEmoji, '1.25rem')}
+                      </span>
                       <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {item.name}
                       </span>
