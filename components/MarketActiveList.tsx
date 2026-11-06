@@ -24,6 +24,7 @@ import {
   remoteAddItem,
   remoteDeleteItem,
   remoteClearChecked,
+  remoteUpdateItem,
 } from '@/lib/market-sync'
 import {
   CATEGORY_ORDER,
@@ -34,6 +35,7 @@ import {
 } from '@/lib/shopping'
 import { UiIcon } from '@/components/icons'
 import EditListNameModal from '@/components/EditListNameModal'
+import EditItemModal from '@/components/EditItemModal'
 import ShareListModal from '@/components/ShareListModal'
 
 function renderIngredientIcon(emoji: string, size = '1.25rem') {
@@ -76,6 +78,7 @@ export default function MarketActiveList() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [undoItem, setUndoItem] = useState<{ item: MarketItem; action: 'checked' | 'deleted' } | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [editingItem, setEditingItem] = useState<MarketItem | null>(null)
 
   const showToast = (msg: string) => {
     setToastMessage(msg)
@@ -260,6 +263,52 @@ export default function MarketActiveList() {
     if (item.remote_item_id) {
       remoteDeleteItem(item.remote_item_id)
     }
+  }
+
+  const handleSaveItemEdit = async (
+    itemId: string,
+    updates: {
+      name: string
+      category: ShoppingCategory
+      quantity: number | null
+      unit: string | null
+    }
+  ) => {
+    const existing = items.find((i) => i.id === itemId)
+    if (!existing) return
+
+    setItems((prev) =>
+      prev.map((i) =>
+        i.id === itemId
+          ? {
+              ...i,
+              name: updates.name,
+              category: updates.category,
+              quantity: updates.quantity,
+              unit: updates.unit,
+            }
+          : i
+      )
+    )
+
+    await saveLocalItem({
+      ...existing,
+      name: updates.name,
+      category: updates.category,
+      quantity: updates.quantity,
+      unit: updates.unit,
+    })
+
+    if (existing.remote_item_id) {
+      remoteUpdateItem(existing.remote_item_id, {
+        name: updates.name,
+        category: updates.category,
+        quantity: updates.quantity,
+        unit: updates.unit,
+      })
+    }
+
+    showToast('Producto actualizado')
   }
 
   const handleUndo = async () => {
@@ -797,22 +846,41 @@ export default function MarketActiveList() {
                       )}
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={(e) => handleDelete(item, e)}
-                      className="btn btn-ghost"
-                      style={{
-                        minWidth: '40px',
-                        minHeight: '40px',
-                        padding: '0.35rem',
-                        color: 'var(--text-muted)',
-                        flexShrink: 0,
-                      }}
-                      title="Eliminar"
-                      aria-label={`Eliminar ${item.name}`}
-                    >
-                      <UiIcon name="trash" size="0.95em" />
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.15rem', flexShrink: 0 }}>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setEditingItem(item)
+                        }}
+                        className="btn btn-ghost"
+                        style={{
+                          minWidth: '38px',
+                          minHeight: '38px',
+                          padding: '0.35rem',
+                          color: 'var(--text-muted)',
+                        }}
+                        title="Editar"
+                        aria-label={`Editar ${item.name}`}
+                      >
+                        <UiIcon name="pencil" size="0.95em" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => handleDelete(item, e)}
+                        className="btn btn-ghost"
+                        style={{
+                          minWidth: '38px',
+                          minHeight: '38px',
+                          padding: '0.35rem',
+                          color: 'var(--text-muted)',
+                        }}
+                        title="Eliminar"
+                        aria-label={`Eliminar ${item.name}`}
+                      >
+                        <UiIcon name="trash" size="0.95em" />
+                      </button>
+                    </div>
                   </div>
                 )
               })}
@@ -898,16 +966,31 @@ export default function MarketActiveList() {
                       </span>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={(e) => handleDelete(item, e)}
-                      className="btn btn-ghost"
-                      style={{ minWidth: '38px', minHeight: '38px', padding: '0.3rem', color: 'var(--text-muted)' }}
-                      title="Eliminar"
-                      aria-label={`Eliminar ${item.name}`}
-                    >
-                      <UiIcon name="trash" size="0.9em" />
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.15rem', flexShrink: 0 }}>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setEditingItem(item)
+                        }}
+                        className="btn btn-ghost"
+                        style={{ minWidth: '36px', minHeight: '36px', padding: '0.3rem', color: 'var(--text-muted)' }}
+                        title="Editar"
+                        aria-label={`Editar ${item.name}`}
+                      >
+                        <UiIcon name="pencil" size="0.9em" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => handleDelete(item, e)}
+                        className="btn btn-ghost"
+                        style={{ minWidth: '36px', minHeight: '36px', padding: '0.3rem', color: 'var(--text-muted)' }}
+                        title="Eliminar"
+                        aria-label={`Eliminar ${item.name}`}
+                      >
+                        <UiIcon name="trash" size="0.9em" />
+                      </button>
+                    </div>
                   </div>
                 )
               })}
@@ -1009,6 +1092,14 @@ export default function MarketActiveList() {
           onToast={showToast}
         />
       )}
+
+      {/* Edit Item Modal */}
+      <EditItemModal
+        isOpen={Boolean(editingItem)}
+        item={editingItem}
+        onClose={() => setEditingItem(null)}
+        onSave={handleSaveItemEdit}
+      />
     </div>
   )
 }

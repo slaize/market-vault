@@ -82,7 +82,16 @@ describe('Shopping Utilities in MarketVault', () => {
       expect(getIngredientEmoji('tomate frito', 'despensa')).toBe('🍅')
       expect(getIngredientEmoji('plátano de canarias', 'frutas-verduras')).toBe('🍌')
       expect(getIngredientEmoji('merluza fresca', 'pescaderia')).toBe('🐟')
+      expect(getIngredientEmoji('Creme Fraiche', 'lacteos')).toBe('🧀')
+      expect(getIngredientEmoji('Crème fraîche', 'lacteos')).toBe('🧀')
       expect(getIngredientEmoji('desconocido x', 'otros')).toBe('🛒')
+    })
+
+    it('categorizes Creme Fraiche and cheeses into lacteos', () => {
+      expect(categorize('Creme Fraiche')).toBe('lacteos')
+      expect(categorize('Crème fraîche')).toBe('lacteos')
+      expect(categorize('crema agria')).toBe('lacteos')
+      expect(categorize('mascarpone')).toBe('lacteos')
     })
   })
 })

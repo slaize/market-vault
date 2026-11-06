@@ -177,6 +177,12 @@ export const INGREDIENT_EMOJI_MAP: Record<string, string> = {
   'cereza': '🍒',
 
   // Lácteos y Huevos
+  'creme fraiche': '🧀',
+  'crème fraîche': '🧀',
+  'crema agria': '🧀',
+  'sour cream': '🧀',
+  'mascarpone': '🧀',
+  'burrata': '🧀',
   'philadelphia': '🧀',
   'queso crema': '🧀',
   'queso': '🧀',
@@ -286,10 +292,10 @@ export function getIngredientEmoji(name: string, category: string): string {
 // ── Categorization ─────────────────────────────────────────────
 
 const CATEGORY_MAP: [ShoppingCategory, string[]][] = [
-  ['carniceria', ['pollo', 'pechuga', 'muslo', 'ternera', 'cerdo', 'carne', 'filete', 'lomo', 'jamón', 'jamon', 'bacon', 'panceta', 'chorizo', 'salchicha', 'fuet', 'buey', 'cordero', 'chuletón', 'chuleton', 'hamburguesa', 'alita']],
+  ['carniceria', ['pollo', 'pavo', 'pechuga', 'muslo', 'ternera', 'cerdo', 'carne', 'filete', 'lomo', 'jamón', 'jamon', 'bacon', 'panceta', 'chorizo', 'salchicha', 'fuet', 'fiambre', 'buey', 'cordero', 'chuletón', 'chuleton', 'hamburguesa', 'alita']],
   ['pescaderia', ['pescado', 'merluza', 'bacalao', 'atún', 'atun', 'salmón', 'salmon', 'sardina', 'dorada', 'lubina', 'gamba', 'langostino', 'pulpo', 'calamar', 'mejillón', 'mejillon', 'almeja', 'marisco', 'anchoa']],
   ['frutas-verduras', ['tomate', 'cebolla', 'ajo', 'zanahoria', 'patata', 'papa', 'lechuga', 'espinaca', 'pimiento', 'brócoli', 'brocoli', 'calabacín', 'calabacin', 'berenjena', 'champiñón', 'champinon', 'seta', 'puerro', 'apio', 'pepino', 'manzana', 'naranja', 'limón', 'limon', 'plátano', 'platano', 'fresa', 'aguacate', 'verdura', 'fruta', 'kiwi', 'pera', 'melocotón', 'melocoton']],
-  ['lacteos', ['leche', 'queso', 'philadelphia', 'yogur', 'mantequilla', 'nata', 'crema', 'mozzarella', 'parmesano', 'cheddar', 'feta', 'ricotta', 'kéfir', 'kefir', 'huevo', 'huevos']],
+  ['lacteos', ['leche', 'queso', 'philadelphia', 'yogur', 'mantequilla', 'nata', 'crema', 'creme fraiche', 'crème fraîche', 'creme', 'fraiche', 'crema agria', 'sour cream', 'mascarpone', 'burrata', 'ricotta', 'mozzarella', 'parmesano', 'cheddar', 'feta', 'kéfir', 'kefir', 'huevo', 'huevos']],
   ['cereales-pan', ['harina', 'pan', 'pasta', 'spatze', 'spaetzle', 'spätzle', 'arroz', 'avena', 'cereales', 'espagueti', 'macarrón', 'macarron', 'fideos', 'lasaña', 'lasana', 'cous-cous', 'quinoa', 'pan de molde', 'galletas', 'levadura', 'burger']],
   ['despensa', ['aceite', 'aceituna', 'aceitunas', 'oliva', 'olivas', 'sal', 'azúcar', 'azucar', 'vinagre', 'salsa', 'ketchup', 'kétchup', 'mostaza', 'mayonesa', 'mahonesa', 'soja', 'pimienta', 'orégano', 'oregano', 'comino', 'pimentón', 'pimenton', 'canela', 'laurel', 'tomillo', 'romero', 'eneldo', 'albahaca', 'perejil', 'cilantro', 'especia', 'hierba', 'caldo', 'tomate frito', 'conserva', 'lata', 'almendra', 'nuez', 'avellana', 'cacahuete', 'miel', 'mermelada', 'chocolate', 'cacao']],
   ['bebidas', ['agua', 'zumo', 'refresco', 'cerveza', 'vino', 'leche vegetal', 'café', 'cafe', 'té', 'te', 'alcohol']],

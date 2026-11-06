@@ -152,7 +152,7 @@ export async function remoteToggleItem(remoteItemId: string | undefined | null, 
 }
 
 export async function remoteAddItem(
-  item: { name: string; quantity: number | null; unit: string | null }
+  item: { name: string; quantity: number | null; unit: string | null; category?: string }
 ): Promise<string | null> {
   const settings = await getMarketSettings()
   if (settings.sync_mode !== 'paired_household' || !settings.paired_token) return null
@@ -165,6 +165,7 @@ export async function remoteAddItem(
         name: item.name,
         quantity: item.quantity,
         unit: item.unit,
+        category: item.category,
       }),
     })
     if (res.ok) {
@@ -175,6 +176,28 @@ export async function remoteAddItem(
     // Graceful offline tolerance
   }
   return null
+}
+
+export async function remoteUpdateItem(
+  remoteItemId: string | undefined | null,
+  updates: { name?: string; category?: string; quantity?: number | null; unit?: string | null }
+): Promise<void> {
+  if (!remoteItemId) return
+  const settings = await getMarketSettings()
+  if (settings.sync_mode !== 'paired_household' || !settings.paired_token) return
+
+  try {
+    await fetch(`${RECIPE_VAULT_URL}/api/s/${settings.paired_token}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        item_id: remoteItemId,
+        ...updates,
+      }),
+    })
+  } catch {
+    // Graceful offline tolerance
+  }
 }
 
 export async function remoteDeleteItem(remoteItemId: string | undefined | null): Promise<void> {
