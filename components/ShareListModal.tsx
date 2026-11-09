@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { UiIcon } from '@/components/icons'
 import { formatShareListText } from '@/lib/shopping'
 import { RECIPE_VAULT_URL } from '@/lib/market-sync'
@@ -12,6 +12,7 @@ interface ShareListModalProps {
   listName: string
   items: MarketItem[]
   pairedToken?: string | null
+  isRemote?: boolean
   onToast: (msg: string) => void
 }
 
@@ -21,15 +22,25 @@ export default function ShareListModal({
   listName,
   items,
   pairedToken,
+  isRemote = true,
   onToast,
 }: ShareListModalProps) {
   const [copiedText, setCopiedText] = useState(false)
   const [copiedLink, setCopiedLink] = useState(false)
 
+  useEffect(() => {
+    if (!isOpen) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
   if (!isOpen) return null
 
   const shareText = formatShareListText(listName, items)
-  const liveShareUrl = pairedToken ? `${RECIPE_VAULT_URL}/s/${pairedToken}` : null
+  const liveShareUrl = isRemote && pairedToken ? `${RECIPE_VAULT_URL}/s/${pairedToken}` : null
 
   const handleWhatsApp = () => {
     const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`

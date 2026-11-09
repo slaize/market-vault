@@ -621,6 +621,61 @@ export function planToShoppingText(
 
 // ── Smart Item Input Parser ───────────────────────────────────
 
+const UNIT_TOKENS = [
+  'botellas?',
+  'paquetes?',
+  'unidades?',
+  'gramos?',
+  'litros?',
+  'bricks?',
+  'docenas?',
+  'manojos?',
+  'sobres?',
+  'botes?',
+  'latas?',
+  'kilos?',
+  'bolsas?',
+  'tarrinas?',
+  'uds?',
+  'kg',
+  'gr?',
+  'ml',
+  'l',
+]
+
+function normalizeUnit(rawUnit: string | null): string | null {
+  if (!rawUnit) return null
+  const u = rawUnit.toLowerCase().trim()
+  if (/^kilos?$/i.test(u) || u === 'kg') return 'kg'
+  if (/^litros?$/i.test(u) || u === 'l') return 'l'
+  if (/^(?:gramos?|gr?)$/i.test(u)) return 'g'
+  if (/^ml$/i.test(u)) return 'ml'
+  if (/^latas?$/i.test(u)) return 'lata'
+  if (/^botes?$/i.test(u)) return 'bote'
+  if (/^botellas?$/i.test(u)) return 'botella'
+  if (/^bricks?$/i.test(u)) return 'brick'
+  if (/^paquetes?$/i.test(u)) return 'paquete'
+  if (/^docenas?$/i.test(u)) return 'docena'
+  if (/^sobres?$/i.test(u)) return 'sobre'
+  if (/^manojos?$/i.test(u)) return 'manojo'
+  if (/^bolsas?$/i.test(u)) return 'bolsa'
+  if (/^tarrinas?$/i.test(u)) return 'tarrina'
+  if (/^(?:unidades?|uds?)$/i.test(u)) return 'ud'
+  return u
+}
+
+function parseQtyNumber(rawQty: string): number | null {
+  if (!rawQty) return null
+  if (rawQty.includes('/')) {
+    const [num, den] = rawQty.split('/').map(Number)
+    if (den && !isNaN(num) && !isNaN(den)) {
+      return Math.round((num / den) * 100) / 100
+    }
+  }
+  const parsed = parseFloat(rawQty.replace(',', '.'))
+  return isNaN(parsed) ? null : parsed
+}
+
 export function parseItemInput(raw: string): {
   name: string
   quantity: number | null
@@ -632,31 +687,32 @@ export function parseItemInput(raw: string): {
     return { name: '', quantity: null, unit: null, category: 'otros' }
   }
 
-  const unitWords = 'kg|kilos?|g|gr|gramos?|l|litros?|ml|botes?|latas?|bricks?|paquetes?|unidades?|uds?|botellas?'
+  const unitWords = `(?:${UNIT_TOKENS.join('|')})\\b`
+  const qtyPattern = '(\\d+\\/\\d+|\\d+(?:[.,]\\d+)?)'
 
-  // Pattern 1: Leading quantity (e.g., "1kg platanos", "2 bricks de leche", "3 manzanas", "500g carne")
-  const leadingMatch = clean.match(new RegExp(`^([\\d]+(?:[.,][\\d]+)?)\\s*(${unitWords})?\\s*(?:de\\s+)?(.*)$`, 'i'))
+  // Pattern 1: Leading quantity (e.g., "1kg platanos", "2 bricks de leche", "3 latas de atun", "1/2 kg patatas")
+  const leadingMatch = clean.match(new RegExp(`^${qtyPattern}\\s*(${unitWords})?\\s*(?:de\\s+)?(.*)$`, 'i'))
   if (leadingMatch && leadingMatch[3]?.trim()) {
-    const qty = parseFloat(leadingMatch[1].replace(',', '.'))
-    const rawUnit = leadingMatch[2]?.toLowerCase() || null
-    const name = leadingMatch[3].trim()
+    const qty = parseQtyNumber(leadingMatch[1])
+    const rawUnit = normalizeUnit(leadingMatch[2] || null)
+    let name = leadingMatch[3].trim().replace(/^de\s+/i, '')
     return {
       name: name.charAt(0).toUpperCase() + name.slice(1),
-      quantity: isNaN(qty) ? null : qty,
+      quantity: qty,
       unit: rawUnit,
       category: categorize(name),
     }
   }
 
   // Pattern 2: Trailing quantity (e.g., "Platanos 1kg", "Leche 2 l", "Tomates 500g", "Huevos 12")
-  const trailingMatch = clean.match(new RegExp(`^(.*?)(?:\\s+|-|:)\\s*([\\d]+(?:[.,][\\d]+)?)\\s*(${unitWords})?$`, 'i'))
+  const trailingMatch = clean.match(new RegExp(`^(.*?)(?:\\s+|-|:)\\s*${qtyPattern}\\s*(${unitWords})?$`, 'i'))
   if (trailingMatch && trailingMatch[1]?.trim()) {
     const name = trailingMatch[1].trim()
-    const qty = parseFloat(trailingMatch[2].replace(',', '.'))
-    const rawUnit = trailingMatch[3]?.toLowerCase() || null
+    const qty = parseQtyNumber(trailingMatch[2])
+    const rawUnit = normalizeUnit(trailingMatch[3] || null)
     return {
       name: name.charAt(0).toUpperCase() + name.slice(1),
-      quantity: isNaN(qty) ? null : qty,
+      quantity: qty,
       unit: rawUnit,
       category: categorize(name),
     }

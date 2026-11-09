@@ -15,6 +15,7 @@
   --accent-primary: #10B981;
   --accent-hover: #059669;
   --accent-glow: rgba(16, 185, 129, 0.18);
+  --btn-primary-text: #ffffff;
   --accent-secondary: #FB7185;
   --accent-secondary-dark: #E11D48;
   --accent-secondary-glow: rgba(251, 113, 133, 0.18);
@@ -41,7 +42,7 @@
   --border-default: rgba(71, 85, 105, 0.16);
   --text-primary: #0F172A;
   --text-secondary: #334155;
-  --text-muted: #64748B;
+  --text-muted: #475569;
   --accent-primary: #059669;
   --accent-hover: #047857;
   --accent-glow: rgba(5, 150, 105, 0.12);
@@ -70,6 +71,7 @@
   --accent-primary: #F97316;
   --accent-hover: #EA580C;
   --accent-glow: rgba(249, 115, 22, 0.25);
+  --btn-primary-text: #0F172A;
   --accent-secondary: #C084FC;
   --accent-secondary-dark: #A855F7;
   --accent-secondary-glow: rgba(192, 132, 252, 0.20);
@@ -143,9 +145,14 @@ input[type="text"], select, textarea {
   min-height: 40px;
 }
 
+.btn:active {
+  transform: scale(0.97);
+  transition: transform 50ms ease;
+}
+
 .btn-primary {
   background: var(--accent-primary);
-  color: #ffffff;
+  color: var(--btn-primary-text, #ffffff);
 }
 
 .btn-primary:hover {

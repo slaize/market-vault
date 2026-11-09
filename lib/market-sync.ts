@@ -1,6 +1,7 @@
 import {
   saveLocalList,
   saveLocalItem,
+  getLocalLists,
   getLocalItems,
   getMarketSettings,
   saveMarketSettings,
@@ -90,6 +91,13 @@ export async function syncActiveListWithRemote(): Promise<{ ok: boolean; synced:
   try {
     const settings = await getMarketSettings()
     if (settings.sync_mode !== 'paired_household' || !settings.paired_token || !settings.active_list_id) {
+      return { ok: true, synced: false }
+    }
+
+    const allLists = await getLocalLists()
+    const activeList = allLists.find((l) => l.id === settings.active_list_id)
+    if (!activeList || !activeList.remote_list_id) {
+      // Local-only list (e.g. Farmacia, Ferretería): do not contaminate with RecipeVault items
       return { ok: true, synced: false }
     }
 
@@ -235,4 +243,14 @@ export async function unpairHousehold(): Promise<void> {
     paired_code: null,
     paired_token: null,
   })
+  try {
+    const lists = await getLocalLists()
+    for (const l of lists) {
+      if (l.remote_list_id) {
+        await saveLocalList({ id: l.id, name: l.name, remote_list_id: null })
+      }
+    }
+  } catch {
+    // Graceful cleanup error ignore
+  }
 }

@@ -35,6 +35,23 @@ export default function EditItemModal({
   const [unit, setUnit] = useState('')
   const [saving, setSaving] = useState(false)
 
+  const QUICK_UNITS = ['ud', 'kg', 'g', 'l', 'lata', 'bote', 'pack']
+
+  const handleStepQty = (delta: number) => {
+    const current = parseFloat(quantity.replace(',', '.')) || 0
+    const next = Math.max(0, current + delta)
+    setQuantity(next === 0 ? '' : String(next))
+  }
+
+  useEffect(() => {
+    if (!isOpen) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
   useEffect(() => {
     if (isOpen && item) {
       setName(item.name || '')
@@ -119,12 +136,11 @@ export default function EditItemModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              autoFocus
               style={{
                 width: '100%',
                 boxSizing: 'border-box',
-                padding: '0.65rem 0.85rem',
-                fontSize: '0.9rem',
+                padding: '0.75rem 0.85rem',
+                fontSize: '0.92rem',
                 borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--border-default)',
                 background: 'var(--bg-base)',
@@ -148,8 +164,8 @@ export default function EditItemModal({
               style={{
                 width: '100%',
                 boxSizing: 'border-box',
-                padding: '0.65rem 0.85rem',
-                fontSize: '0.9rem',
+                padding: '0.75rem 0.85rem',
+                fontSize: '0.92rem',
                 borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--border-default)',
                 background: 'var(--bg-base)',
@@ -169,7 +185,7 @@ export default function EditItemModal({
             </select>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.65rem' }}>
             <div>
               <label
                 htmlFor="edit-item-qty"
@@ -177,24 +193,73 @@ export default function EditItemModal({
               >
                 Cantidad
               </label>
-              <input
-                id="edit-item-qty"
-                type="text"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                placeholder="Ej. 1 o 250"
-                style={{
-                  width: '100%',
-                  boxSizing: 'border-box',
-                  padding: '0.65rem 0.85rem',
-                  fontSize: '0.9rem',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--border-default)',
-                  background: 'var(--bg-base)',
-                  color: 'var(--text-primary)',
-                  outline: 'none',
-                }}
-              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <button
+                  type="button"
+                  onClick={() => handleStepQty(-1)}
+                  style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border-default)',
+                    background: 'var(--bg-base)',
+                    color: 'var(--text-primary)',
+                    fontSize: '1.2rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                  aria-label="Restar 1"
+                >
+                  -
+                </button>
+                <input
+                  id="edit-item-qty"
+                  type="text"
+                  inputMode="decimal"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  placeholder="1"
+                  style={{
+                    width: '100%',
+                    minWidth: 0,
+                    boxSizing: 'border-box',
+                    padding: '0.65rem 0.4rem',
+                    textAlign: 'center',
+                    fontSize: '0.92rem',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border-default)',
+                    background: 'var(--bg-base)',
+                    color: 'var(--text-primary)',
+                    outline: 'none',
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => handleStepQty(1)}
+                  style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border-default)',
+                    background: 'var(--bg-base)',
+                    color: 'var(--text-primary)',
+                    fontSize: '1.2rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                  aria-label="Sumar 1"
+                >
+                  +
+                </button>
+              </div>
             </div>
             <div>
               <label
@@ -212,8 +277,8 @@ export default function EditItemModal({
                 style={{
                   width: '100%',
                   boxSizing: 'border-box',
-                  padding: '0.65rem 0.85rem',
-                  fontSize: '0.9rem',
+                  padding: '0.75rem 0.85rem',
+                  fontSize: '0.92rem',
                   borderRadius: 'var(--radius-md)',
                   border: '1px solid var(--border-default)',
                   background: 'var(--bg-base)',
@@ -224,14 +289,38 @@ export default function EditItemModal({
             </div>
           </div>
 
+          {/* Quick unit chips */}
+          <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginTop: '-0.15rem' }}>
+            {QUICK_UNITS.map((u) => (
+              <button
+                key={u}
+                type="button"
+                onClick={() => setUnit(u)}
+                style={{
+                  fontSize: '0.75rem',
+                  padding: '0.2rem 0.55rem',
+                  borderRadius: '999px',
+                  border: unit.toLowerCase() === u ? '1px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
+                  background: unit.toLowerCase() === u ? 'var(--accent-glow)' : 'var(--bg-glass)',
+                  color: unit.toLowerCase() === u ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  fontWeight: unit.toLowerCase() === u ? 700 : 500,
+                }}
+              >
+                {u}
+              </button>
+            ))}
+          </div>
+
           <div style={{ display: 'flex', gap: '0.65rem', justifyContent: 'flex-end', marginTop: '0.75rem' }}>
             <button
               type="button"
               onClick={onClose}
               disabled={saving}
               style={{
-                padding: '0.55rem 1rem',
-                fontSize: '0.85rem',
+                padding: '0.75rem 1.25rem',
+                minHeight: '44px',
+                fontSize: '0.9rem',
                 fontWeight: 600,
                 borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--border-default)',
@@ -246,8 +335,9 @@ export default function EditItemModal({
               type="submit"
               disabled={saving || !name.trim()}
               style={{
-                padding: '0.55rem 1.15rem',
-                fontSize: '0.85rem',
+                padding: '0.75rem 1.35rem',
+                minHeight: '44px',
+                fontSize: '0.9rem',
                 fontWeight: 700,
                 borderRadius: 'var(--radius-md)',
                 border: 'none',

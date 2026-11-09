@@ -47,6 +47,40 @@ describe('Shopping Utilities in MarketVault', () => {
       expect(res.unit).toBeNull()
       expect(res.category).toBe('carniceria')
     })
+
+    it('correctly parses complex units without word truncation (e.g. latas, litros, botellas, gramos)', () => {
+      const latas = parseItemInput('3 latas de atun')
+      expect(latas.quantity).toBe(3)
+      expect(latas.unit).toBe('lata')
+      expect(latas.name).toBe('Atun')
+
+      const litros = parseItemInput('2 litros de leche')
+      expect(litros.quantity).toBe(2)
+      expect(litros.unit).toBe('l')
+      expect(litros.name).toBe('Leche')
+
+      const botellas = parseItemInput('1 botella de vino')
+      expect(botellas.quantity).toBe(1)
+      expect(botellas.unit).toBe('botella')
+      expect(botellas.name).toBe('Vino')
+
+      const gramos = parseItemInput('500 gramos de arroz')
+      expect(gramos.quantity).toBe(500)
+      expect(gramos.unit).toBe('g')
+      expect(gramos.name).toBe('Arroz')
+    })
+
+    it('supports fraction quantities (e.g. "1/2 kg patatas", "1/4 l nata")', () => {
+      const res1 = parseItemInput('1/2 kg patatas')
+      expect(res1.quantity).toBe(0.5)
+      expect(res1.unit).toBe('kg')
+      expect(res1.name).toBe('Patatas')
+
+      const res2 = parseItemInput('1/4 l de nata')
+      expect(res2.quantity).toBe(0.25)
+      expect(res2.unit).toBe('l')
+      expect(res2.name).toBe('Nata')
+    })
   })
 
   describe('formatShareListText', () => {

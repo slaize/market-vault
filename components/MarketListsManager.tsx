@@ -13,6 +13,7 @@ import {
   type MarketItem,
 } from '@/lib/market-db'
 import { UiIcon } from '@/components/icons'
+import { formatShareListText } from '@/lib/shopping'
 import EditListNameModal from '@/components/EditListNameModal'
 import ConfirmModal from '@/components/ConfirmModal'
 import ShareListModal from '@/components/ShareListModal'
@@ -20,6 +21,7 @@ import ShareListModal from '@/components/ShareListModal'
 export default function MarketListsManager() {
   const router = useRouter()
   const [lists, setLists] = useState<MarketList[]>([])
+  const [itemCounts, setItemCounts] = useState<Record<string, { pending: number; total: number }>>({})
   const [activeListId, setActiveListId] = useState<string | null>(null)
   const [newListName, setNewListName] = useState('')
   const [feedback, setFeedback] = useState<string | null>(null)
@@ -30,7 +32,7 @@ export default function MarketListsManager() {
   // Modals state
   const [editingList, setEditingList] = useState<MarketList | null>(null)
   const [deletingList, setDeletingList] = useState<MarketList | null>(null)
-  const [sharingData, setSharingData] = useState<{ listName: string; items: MarketItem[] } | null>(null)
+  const [sharingData, setSharingData] = useState<{ listName: string; items: MarketItem[]; isRemote: boolean } | null>(null)
 
   const notify = (msg: string) => {
     setFeedback(msg)
@@ -44,6 +46,18 @@ export default function MarketListsManager() {
       const settings = await getMarketSettings()
       setActiveListId(settings.active_list_id || all[0]?.id || null)
       setPairedToken(settings.paired_token || null)
+
+      const counts: Record<string, { pending: number; total: number }> = {}
+      for (const l of all) {
+        try {
+          const its = await getLocalItems(l.id)
+          const pending = its.filter((i) => !i.is_checked).length
+          counts[l.id] = { pending, total: its.length }
+        } catch {
+          counts[l.id] = { pending: 0, total: 0 }
+        }
+      }
+      setItemCounts(counts)
     } finally {
       setLoading(false)
     }
@@ -136,10 +150,7 @@ export default function MarketListsManager() {
     e.stopPropagation()
     try {
       const items = await getLocalItems(list.id)
-      const text = `🛒 ${list.name}\n\n${items
-        .filter((i) => !i.is_checked)
-        .map((i) => `• ${i.quantity ? i.quantity + (i.unit ? ' ' + i.unit : '') + ' ' : ''}${i.name}`)
-        .join('\n')}`
+      const text = formatShareListText(list.name, items)
       if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(text)
       }
@@ -153,7 +164,7 @@ export default function MarketListsManager() {
     e.stopPropagation()
     try {
       const items = await getLocalItems(list.id)
-      setSharingData({ listName: list.name, items })
+      setSharingData({ listName: list.name, items, isRemote: Boolean(list.remote_list_id) })
     } catch {
       notify('No se pudieron cargar los productos para compartir')
     }
@@ -252,6 +263,16 @@ export default function MarketListsManager() {
           {lists.map((list) => {
             const isActive = list.id === activeListId
             const isMenuOpen = openMenuId === list.id
+            const count = itemCounts[list.id]
+            const countLabel = count
+              ? count.total === 0
+                ? 'Vacía'
+                : count.pending === 0
+                ? 'Completada'
+                : count.pending === 1
+                ? '1 pendiente'
+                : `${count.pending} pendientes`
+              : null
             return (
               <div
                 key={list.id}
@@ -299,18 +320,33 @@ export default function MarketListsManager() {
                     <UiIcon name={list.remote_list_id ? 'link' : 'unlink'} size="1.15em" />
                   </span>
 
-                  <strong
-                    style={{
-                      fontSize: '0.98rem',
-                      color: 'var(--text-primary)',
-                      fontWeight: 600,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {list.name}
-                  </strong>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.45rem', minWidth: 0, overflow: 'hidden' }}>
+                    <strong
+                      style={{
+                        fontSize: '0.98rem',
+                        color: 'var(--text-primary)',
+                        fontWeight: 600,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {list.name}
+                    </strong>
+                    {countLabel && (
+                      <span
+                        style={{
+                          fontSize: '0.72rem',
+                          color: count?.pending === 0 && count.total > 0 ? 'var(--accent-primary)' : 'var(--text-muted)',
+                          fontWeight: count?.pending === 0 ? 600 : 400,
+                          whiteSpace: 'nowrap',
+                          flexShrink: 0,
+                        }}
+                      >
+                        · {countLabel}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexShrink: 0 }}>
@@ -478,6 +514,7 @@ export default function MarketListsManager() {
           listName={sharingData.listName}
           items={sharingData.items}
           pairedToken={pairedToken}
+          isRemote={sharingData.isRemote}
           onToast={notify}
         />
       )}

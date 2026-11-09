@@ -124,6 +124,45 @@ export default function MarketActiveList() {
     loadData()
   }, [loadData])
 
+  // Screen Wake Lock API to prevent screen timeout while shopping in supermarket
+  useEffect(() => {
+    let sentinel: any = null
+    const requestWakeLock = async () => {
+      try {
+        if (typeof navigator !== 'undefined' && 'wakeLock' in navigator && (navigator as any).wakeLock?.request) {
+          sentinel = await (navigator as any).wakeLock.request('screen')
+        }
+      } catch {
+        // Battery saver or background mode can reject
+      }
+    }
+    requestWakeLock()
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        requestWakeLock()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility)
+      if (sentinel && typeof sentinel.release === 'function') {
+        sentinel.release().catch(() => {})
+      }
+    }
+  }, [])
+
+  const triggerHaptic = (pattern: number | number[] = 15) => {
+    try {
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator && typeof navigator.vibrate === 'function') {
+        navigator.vibrate(pattern)
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   // Live suggestions query
   useEffect(() => {
     const q = newItemName.trim()
@@ -228,13 +267,14 @@ export default function MarketActiveList() {
 
   const handleToggle = async (item: MarketItem) => {
     const nextState = !item.is_checked
+    triggerHaptic(15)
 
     // Set undo state if marking as checked
     if (nextState) {
       setUndoItem({ item, action: 'checked' })
       setTimeout(() => {
         setUndoItem((current) => (current?.item.id === item.id ? null : current))
-      }, 4000)
+      }, 6000)
     }
 
     // Optimistic update
@@ -252,10 +292,11 @@ export default function MarketActiveList() {
 
   const handleDelete = async (item: MarketItem, e: React.MouseEvent) => {
     e.stopPropagation()
+    triggerHaptic([20, 50, 20])
     setUndoItem({ item, action: 'deleted' })
     setTimeout(() => {
       setUndoItem((current) => (current?.item.id === item.id ? null : current))
-    }, 4000)
+    }, 6000)
 
     setItems((prev) => prev.filter((i) => i.id !== item.id))
     await deleteLocalItem(item.id)
@@ -405,7 +446,10 @@ export default function MarketActiveList() {
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           borderBottom: '1px solid var(--border-subtle)',
-          padding: '0.85rem 0 0.65rem',
+          paddingTop: 'max(0.85rem, env(safe-area-inset-top))',
+          paddingBottom: '0.65rem',
+          paddingLeft: 'max(1rem, env(safe-area-inset-left))',
+          paddingRight: 'max(1rem, env(safe-area-inset-right))',
           marginBottom: '1rem',
         }}
       >
@@ -1121,6 +1165,7 @@ export default function MarketActiveList() {
           listName={activeList.name}
           items={items}
           pairedToken={pairedToken}
+          isRemote={Boolean(activeList.remote_list_id)}
           onToast={showToast}
         />
       )}
