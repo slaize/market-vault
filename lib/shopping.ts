@@ -3,14 +3,22 @@
  */
 
 export type ShoppingCategory =
-  | 'carniceria'
-  | 'pescaderia'
   | 'frutas-verduras'
+  | 'panaderia'
+  | 'carniceria'
+  | 'charcuteria'
+  | 'pescaderia'
   | 'lacteos'
   | 'cereales-pan'
+  | 'especias-condimentos'
   | 'despensa'
-  | 'congelados'
+  | 'snacks-dulces'
   | 'bebidas'
+  | 'congelados'
+  | 'limpieza-hogar'
+  | 'higiene-cuidado'
+  | 'mascotas'
+  | 'bebes-infantil'
   | 'otros'
 
 export interface ConsolidatedItem {
@@ -21,26 +29,42 @@ export interface ConsolidatedItem {
 }
 
 export const CATEGORY_LABELS: Record<ShoppingCategory, { label: string; emoji: string }> = {
-  'carniceria':      { label: 'Carnicería',         emoji: '🥩' },
-  'pescaderia':      { label: 'Pescadería',          emoji: '🐟' },
-  'frutas-verduras': { label: 'Frutas y Verduras',  emoji: '🥦' },
-  'lacteos':         { label: 'Lácteos',             emoji: '🧀' },
-  'cereales-pan':    { label: 'Cereales y Pan',      emoji: '🌾' },
-  'despensa':        { label: 'Despensa',             emoji: '🥫' },
-  'congelados':      { label: 'Congelados',           emoji: '🧊' },
-  'bebidas':         { label: 'Bebidas',              emoji: '🥤' },
-  'otros':           { label: 'Otros',                emoji: '🛒' },
+  'frutas-verduras':     { label: 'Frutas y Verduras',          emoji: '🥦' },
+  'panaderia':           { label: 'Panadería y Bollería',       emoji: '🥖' },
+  'carniceria':          { label: 'Carnicería',                 emoji: '🥩' },
+  'charcuteria':         { label: 'Charcutería y Embutidos',    emoji: '🥓' },
+  'pescaderia':          { label: 'Pescadería',                 emoji: '🐟' },
+  'lacteos':             { label: 'Lácteos y Huevos',           emoji: '🧀' },
+  'cereales-pan':        { label: 'Pastas, Arroces y Harinas',  emoji: '🌾' },
+  'especias-condimentos':{ label: 'Especias y Condimentos',     emoji: '🧂' },
+  'despensa':            { label: 'Despensa y Conservas',       emoji: '🥫' },
+  'snacks-dulces':       { label: 'Snacks y Dulces',            emoji: '🍫' },
+  'bebidas':             { label: 'Bebidas',                    emoji: '🥤' },
+  'congelados':          { label: 'Congelados',                 emoji: '🧊' },
+  'limpieza-hogar':      { label: 'Limpieza y Hogar',           emoji: '🧹' },
+  'higiene-cuidado':     { label: 'Higiene y Cuidado Personal', emoji: '🧴' },
+  'mascotas':            { label: 'Mascotas',                   emoji: '🐾' },
+  'bebes-infantil':      { label: 'Bebé e Infantil',            emoji: '🍼' },
+  'otros':               { label: 'Otros',                      emoji: '🛒' },
 }
 
 export const CATEGORY_ORDER: ShoppingCategory[] = [
   'frutas-verduras',
+  'panaderia',
   'carniceria',
+  'charcuteria',
   'pescaderia',
   'lacteos',
   'cereales-pan',
+  'especias-condimentos',
   'despensa',
+  'snacks-dulces',
   'bebidas',
   'congelados',
+  'limpieza-hogar',
+  'higiene-cuidado',
+  'mascotas',
+  'bebes-infantil',
   'otros',
 ]
 
@@ -80,6 +104,37 @@ export const INGREDIENT_EMOJI_MAP: Record<string, string> = {
   'bayeta': '🧽',
   'jabón': '🧼',
   'jabon': '🧼',
+
+  // Higiene y Cuidado Personal
+  'pasta de dientes': '🪥',
+  'dentífrico': '🪥',
+  'dentifrico': '🪥',
+  'cepillo de dientes': '🪥',
+  'champú': '🧴',
+  'champu': '🧴',
+  'desodorante': '🧴',
+  'colonia': '🧴',
+  'perfume': '🧴',
+
+  // Mascotas
+  'comida de perro': '🐶',
+  'comida perro': '🐶',
+  'comida de gato': '🐱',
+  'comida gato': '🐱',
+  'pienso': '🐾',
+  'arena de gato': '🐾',
+  'arena gato': '🐾',
+
+  // Bebé e Infantil
+  'pañal': '👶',
+  'pañales': '👶',
+  'toallitas de bebe': '👶',
+  'toallitas bebe': '👶',
+  'potito': '🍼',
+  'potitos': '🍼',
+  'papilla': '🥣',
+  'biberón': '🍼',
+  'biberon': '🍼',
 
   // Salsas y Condimentos (declaradas antes de 'sal' para evitar falsos positivos con 'salsa')
   'salsa bbq': '🥫',
@@ -128,7 +183,7 @@ export const INGREDIENT_EMOJI_MAP: Record<string, string> = {
   'hierba': '🌿',
   'hierbas': '🌿',
 
-  // Dulces y Postres
+  // Snacks, Dulces y Postres
   'helados': '🍨',
   'helado': '🍨',
   'azúcar': '🍬',
@@ -137,7 +192,18 @@ export const INGREDIENT_EMOJI_MAP: Record<string, string> = {
   'sirope': '🍯',
   'chocolate': '🍫',
   'cacao': '🍫',
+  'bombones': '🍫',
+  'turrón': '🍫',
+  'turron': '🍫',
   'galletas': '🍪',
+  'patatas fritas': '🍟',
+  'chips': '🍟',
+  'nachos': '🧀',
+  'palomitas': '🍿',
+  'gominolas': '🍬',
+  'chuches': '🍬',
+  'caramelo': '🍬',
+  'caramelos': '🍬',
 
   // Frutas y Verduras
   'ajo': '🧄',
@@ -193,9 +259,14 @@ export const INGREDIENT_EMOJI_MAP: Record<string, string> = {
   'mantequilla': '🧈',
   'nata': '🥛',
 
-  // Carnicería y Charcutería
+  // Carnicería
   'pollo': '🍗',
   'pavo': '🍗',
+  'ternera': '🥩',
+  'cerdo': '🥩',
+  'carne': '🥩',
+
+  // Charcutería y Embutidos
   'fuet': '🥓',
   'jamón': '🥓',
   'jamon': '🥓',
@@ -203,9 +274,15 @@ export const INGREDIENT_EMOJI_MAP: Record<string, string> = {
   'panceta': '🥓',
   'salchicha': '🌭',
   'chorizo': '🌭',
-  'ternera': '🥩',
-  'cerdo': '🥩',
-  'carne': '🥩',
+  'salchichón': '🥓',
+  'salchichon': '🥓',
+  'mortadela': '🥓',
+  'lomo embuchado': '🥓',
+  'cecina': '🥓',
+  'salami': '🥓',
+  'sobrasada': '🥓',
+  'paté': '🥫',
+  'pate': '🥫',
 
   // Pescadería
   'pescado': '🐟',
@@ -225,11 +302,24 @@ export const INGREDIENT_EMOJI_MAP: Record<string, string> = {
   'mejillon': '🦪',
   'almeja': '🦪',
 
-  // Panadería, Harinas, Pastas y Granos
+  // Panadería y Bollería
   'pan burger': '🍔',
   'burger': '🍔',
   'pan de molde': '🍞',
   'pan': '🍞',
+  'croissant': '🥐',
+  'croissants': '🥐',
+  'magdalena': '🧁',
+  'magdalenas': '🧁',
+  'donut': '🍩',
+  'donuts': '🍩',
+  'baguette': '🥖',
+  'barra de pan': '🥖',
+  'bizcocho': '🥮',
+  'brioche': '🍞',
+  'empanada': '🥟',
+
+  // Pastas, Arroces, Harinas y Legumbres
   'spatze': '🍝',
   'spaetzle': '🍝',
   'spätzle': '🍝',
@@ -292,24 +382,34 @@ export function getIngredientEmoji(name: string, category: string): string {
 // ── Categorization ─────────────────────────────────────────────
 
 const CATEGORY_MAP: [ShoppingCategory, string[]][] = [
-  ['carniceria', ['pollo', 'pavo', 'pechuga', 'muslo', 'ternera', 'cerdo', 'carne', 'filete', 'lomo', 'jamón', 'jamon', 'bacon', 'panceta', 'chorizo', 'salchicha', 'fuet', 'fiambre', 'buey', 'cordero', 'chuletón', 'chuleton', 'hamburguesa', 'alita']],
-  ['pescaderia', ['pescado', 'merluza', 'bacalao', 'atún', 'atun', 'salmón', 'salmon', 'sardina', 'dorada', 'lubina', 'gamba', 'langostino', 'pulpo', 'calamar', 'mejillón', 'mejillon', 'almeja', 'marisco', 'anchoa']],
-  ['frutas-verduras', ['tomate', 'cebolla', 'ajo', 'zanahoria', 'patata', 'papa', 'lechuga', 'espinaca', 'pimiento', 'brócoli', 'brocoli', 'calabacín', 'calabacin', 'berenjena', 'champiñón', 'champinon', 'seta', 'puerro', 'apio', 'pepino', 'manzana', 'naranja', 'limón', 'limon', 'plátano', 'platano', 'fresa', 'aguacate', 'verdura', 'fruta', 'kiwi', 'pera', 'melocotón', 'melocoton']],
-  ['lacteos', ['leche', 'queso', 'philadelphia', 'yogur', 'mantequilla', 'nata', 'crema', 'creme fraiche', 'crème fraîche', 'creme', 'fraiche', 'crema agria', 'sour cream', 'mascarpone', 'burrata', 'ricotta', 'mozzarella', 'parmesano', 'cheddar', 'feta', 'kéfir', 'kefir', 'huevo', 'huevos']],
-  ['cereales-pan', ['harina', 'pan', 'pasta', 'spatze', 'spaetzle', 'spätzle', 'arroz', 'avena', 'cereales', 'espagueti', 'macarrón', 'macarron', 'fideos', 'lasaña', 'lasana', 'cous-cous', 'quinoa', 'pan de molde', 'galletas', 'levadura', 'burger']],
-  ['despensa', ['aceite', 'aceituna', 'aceitunas', 'oliva', 'olivas', 'sal', 'azúcar', 'azucar', 'vinagre', 'salsa', 'ketchup', 'kétchup', 'mostaza', 'mayonesa', 'mahonesa', 'soja', 'pimienta', 'orégano', 'oregano', 'comino', 'pimentón', 'pimenton', 'canela', 'laurel', 'tomillo', 'romero', 'eneldo', 'albahaca', 'perejil', 'cilantro', 'especia', 'hierba', 'caldo', 'tomate frito', 'conserva', 'lata', 'almendra', 'nuez', 'avellana', 'cacahuete', 'miel', 'mermelada', 'chocolate', 'cacao']],
-  ['bebidas', ['agua', 'zumo', 'refresco', 'cerveza', 'vino', 'leche vegetal', 'café', 'cafe', 'té', 'te', 'alcohol']],
-  ['congelados', ['helado', 'helados', 'congelado', 'guisante congelado', 'espinaca congelada']],
+  ['congelados', ['helado', 'helados', 'congelado', 'congelada', 'congelados', 'congeladas', 'hielo', 'cubitos de hielo']],
+  ['limpieza-hogar', ['detergente', 'suavizante', 'lavavajillas', 'friegaplatos', 'estropajo', 'bayeta', 'esponja', 'lejía', 'lejia', 'fregasuelos', 'desengrasante', 'multiusos', 'bolsas de basura', 'bolsa de basura', 'papel higiénico', 'papel higienico', 'papel de cocina', 'servilletas', 'papel de aluminio', 'papel albal', 'albal', 'film transparente', 'papel film', 'papel de horno', 'papel vegetal', 'insecticida', 'ambientador', 'fregona', 'escoba', 'pastillas lavavajillas', 'pastillas lavavajilla', 'limpiacristales', 'limpieza']],
+  ['higiene-cuidado', ['gel de ducha', 'gel de bano', 'gel de baño', 'champú', 'champu', 'acondicionador', 'mascarilla pelo', 'jabón de manos', 'jabon de manos', 'jabón', 'jabon', 'pasta de dientes', 'dentífrico', 'dentifrico', 'cepillo de dientes', 'desodorante', 'cuchilla de afeitar', 'cuchillas', 'espuma de afeitar', 'crema hidratante', 'crema solar', 'protector solar', 'toallitas húmedas', 'toallitas humedas', 'pañuelos', 'panuelos', 'compresas', 'tampones', 'disco desmaquillante', 'algodón', 'algodon', 'colonia', 'perfume', 'enjuague bucal', 'hilo dental']],
+  ['mascotas', ['comida de perro', 'comida perro', 'comida de gato', 'comida gato', 'pienso', 'arena de gato', 'arena para gato', 'latas perro', 'latas gato', 'premios perro', 'premios gato', 'snack perro', 'snack gato', 'champu perro', 'champú perro', 'correa perro', 'mascota', 'mascotas']],
+  ['bebes-infantil', ['pañal', 'pañales', 'panal', 'panales', 'toallitas de bebe', 'toallitas bebe', 'toallitas de bebé', 'toallitas bebé', 'potito', 'potitos', 'papilla', 'leche de formula', 'leche infantil', 'biberón', 'biberon', 'chupete', 'cereales bebe']],
+  ['snacks-dulces', ['patatas fritas', 'chips', 'nachos', 'palomitas', 'doritos', 'pretzel', 'aperitivos', 'cortezas', 'gusanitos', 'frutos secos', 'almendra', 'almendras', 'nuez', 'nueces', 'avellana', 'avellanas', 'cacahuete', 'cacahuetes', 'pistacho', 'pistachos', 'pipas', 'anacardo', 'anacardos', 'castaña', 'castañas', 'chuches', 'gominolas', 'caramelo', 'caramelos', 'chicle', 'chicles', 'nubes', 'bombones', 'turrón', 'turron', 'nutella', 'nocilla', 'chocolate', 'cacao', 'galletas', 'cookies']],
+  ['despensa', ['aceite', 'aceituna', 'aceitunas', 'oliva', 'olivas', 'azúcar', 'azucar', 'vinagre', 'salsa', 'ketchup', 'kétchup', 'mostaza', 'mayonesa', 'mahonesa', 'soja', 'caldo', 'tomate frito', 'tomate triturado', 'conserva', 'lata', 'miel', 'mermelada', 'confitura', 'sirope', 'alioli', 'tabasco', 'pesto', 'atún en lata', 'atun en lata', 'pepinillos', 'alcaparras']],
+  ['charcuteria', ['jamón', 'jamon', 'bacon', 'panceta', 'chorizo', 'salchicha', 'salchichas', 'fuet', 'fiambre', 'salchichón', 'salchichon', 'mortadela', 'lomo embuchado', 'cecina', 'sobrasada', 'chistorra', 'morcilla', 'salami', 'pate', 'paté', 'butifarra']],
+  ['carniceria', ['pollo', 'pavo', 'pechuga', 'muslo', 'muslos', 'ternera', 'cerdo', 'carne', 'filete', 'filetes', 'lomo', 'buey', 'cordero', 'chuletón', 'chuleton', 'chuleta', 'chuletas', 'hamburguesa', 'hamburguesas', 'alita', 'alitas', 'costilla', 'costillas', 'solomillo', 'carne picada', 'picada', 'conejo', 'secreto', 'presa', 'pluma']],
+  ['pescaderia', ['pescado', 'merluza', 'bacalao', 'atún', 'atun', 'salmón', 'salmon', 'sardina', 'sardinas', 'dorada', 'lubina', 'gamba', 'gambas', 'langostino', 'langostinos', 'pulpo', 'calamar', 'calamares', 'mejillón', 'mejillon', 'mejillones', 'almeja', 'almejas', 'marisco', 'anchoa', 'anchoas', 'boquerón', 'boqueron', 'boquerones', 'trucha', 'rape', 'emperador', 'pez espada', 'sepia', 'chocos', 'chipirones', 'berberechos', 'navajas', 'buey de mar', 'centollo']],
+  ['panaderia', ['pan', 'pan de molde', 'croissant', 'croissants', 'magdalena', 'magdalenas', 'bizcocho', 'bollo', 'bollos', 'ensaimada', 'ensaimadas', 'donut', 'donuts', 'brioche', 'pan rallado', 'hogaza', 'picos', 'colines', 'tostadas', 'biscotes', 'muffins', 'empanada', 'hojaldre', 'masa de pizza', 'masa hojaldre', 'masa quebrada', 'pan burger', 'pan de hamburguesa', 'panecillo', 'panecillos', 'baguette', 'barra de pan', 'tortillas de trigo', 'tortillas de maiz']],
+  ['cereales-pan', ['harina', 'harina de fuerza', 'harina integral', 'maizena', 'pasta', 'espagueti', 'espaguetis', 'macarrón', 'macarron', 'macarrones', 'fideos', 'lasaña', 'lasana', 'canelones', 'tallarines', 'raviolis', 'tortellini', 'arroz', 'avena', 'cereales', 'quinoa', 'cuscús', 'cuscus', 'cous-cous', 'spatze', 'spaetzle', 'spätzle', 'lentejas', 'garbanzos', 'alubias', 'judías secas', 'judias secas', 'levadura']],
+  ['lacteos', ['leche', 'queso', 'philadelphia', 'yogur', 'yogurt', 'mantequilla', 'nata', 'crema', 'creme fraiche', 'crème fraîche', 'crema agria', 'sour cream', 'mascarpone', 'burrata', 'ricotta', 'mozzarella', 'parmesano', 'cheddar', 'feta', 'kéfir', 'kefir', 'huevo', 'huevos', 'cuajada', 'requesón', 'requeson', 'bechamel', 'margarina']],
+  ['bebidas', ['agua', 'agua mineral', 'agua con gas', 'zumo', 'jugo', 'refresco', 'coca-cola', 'cocacola', 'fanta', 'sprite', 'tónica', 'tonica', 'cerveza', 'vino', 'cava', 'champán', 'champan', 'sidra', 'leche vegetal', 'bebida de soja', 'bebida de avena', 'bebida de almendra', 'café', 'cafe', 'té', 'te', 'infusión', 'infusion', 'manzanilla', 'poleo', 'alcohol', 'ron', 'ginebra', 'vodka', 'whisky', 'licor', 'vermut']],
+  ['especias-condimentos', ['sal', 'pimienta', 'canela', 'comino', 'pimentón', 'pimenton', 'curry', 'cúrcuma', 'curcuma', 'nuez moscada', 'clavo', 'azafrán', 'azafran', 'cardamomo', 'orégano', 'oregano', 'laurel', 'tomillo', 'romero', 'eneldo', 'albahaca', 'perejil', 'cilantro', 'hierbabuena', 'menta', 'estragón', 'estragon', 'hierbas', 'hierba', 'vainilla', 'páprika', 'paprika', 'cayena', 'guindilla', 'chile', 'sazonador', 'anís', 'anis', 'jengibre']],
+  ['frutas-verduras', ['tomate', 'tomates', 'cebolla', 'cebollas', 'ajo', 'ajos', 'zanahoria', 'zanahorias', 'patata', 'patatas', 'papa', 'papas', 'lechuga', 'espinaca', 'espinacas', 'pimiento', 'pimientos', 'brócoli', 'brocoli', 'calabacín', 'calabacin', 'berenjena', 'berenjenas', 'champiñón', 'champinon', 'champiñones', 'seta', 'setas', 'puerro', 'puerros', 'apio', 'pepino', 'pepinos', 'manzana', 'manzanas', 'naranja', 'naranjas', 'limón', 'limon', 'limones', 'lima', 'limas', 'plátano', 'platano', 'plátanos', 'fresa', 'fresas', 'aguacate', 'aguacates', 'verdura', 'fruta', 'kiwi', 'kiwis', 'pera', 'peras', 'melocotón', 'melocoton', 'sandía', 'sandia', 'melón', 'melon', 'uva', 'uvas', 'cereza', 'cerezas', 'mango', 'piña', 'pina', 'mandarina', 'mandarinas', 'calabaza', 'espárrago', 'esparrago', 'espárragos', 'esparragos', 'alcachofa', 'alcachofas', 'judías verdes', 'judias verdes', 'judía verde', 'acelga', 'acelgas', 'coliflor', 'repollo', 'col', 'lombarda', 'rábano', 'rabano', 'jengibre fresco', 'arándanos', 'arandanos', 'frambuesas', 'moras']],
 ]
 
 /**
  * Heuristically classifies an ingredient name into a shopping category
- * (carniceria, pescaderia, frutas-verduras, lacteos, cereales-pan, despensa,
- * bebidas, congelados or 'otros' as fallback).
+ * (frutas-verduras, panaderia, carniceria, charcuteria, pescaderia, lacteos,
+ * cereales-pan, especias-condimentos, despensa, snacks-dulces, bebidas,
+ * congelados, limpieza-hogar, higiene-cuidado, mascotas, bebes-infantil,
+ * or 'otros' as fallback).
  *
  * The function is keyword-based and intentionally conservative: dry/ground
- * spices always go to `despensa` regardless of base food category, and
- * unknown items fall through to `otros`.
+ * spices, powders, extracts and colorings always go to `especias-condimentos`,
+ * and unknown items fall through to `otros`.
  *
  * @param name - Free-text ingredient name.
  * @returns The best-guess category.
@@ -318,24 +418,23 @@ export function categorize(name: string): ShoppingCategory {
   const n = name.toLowerCase()
   const nClean = n.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 
-  // Especias secas, extractos y condimentos deshidratados van a despensa
+  // Especias en polvo, molidas, extractos y sazonadores van a especias-condimentos
   if (
     nClean.includes('en polvo') ||
     nClean.includes('molido') ||
     nClean.includes('molida') ||
-    nClean.includes('seco') ||
-    nClean.includes('seca') ||
     nClean.includes('extracto') ||
-    nClean.includes('colorante')
+    nClean.includes('colorante') ||
+    nClean.includes('sazonador')
   ) {
-    return 'despensa'
+    return 'especias-condimentos'
   }
 
   for (const [cat, keywords] of CATEGORY_MAP) {
     if (keywords.some((k) => {
       const kClean = k.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      if (kClean.length < 4 && !kClean.includes(' ')) {
-        const rx = new RegExp(`\\b${kClean}\\b`, 'i')
+      if (kClean.length <= 4 && !kClean.includes(' ')) {
+        const rx = new RegExp(`\\b${kClean}(?:s|es)?\\b`, 'i')
         return rx.test(nClean)
       }
       return nClean.includes(kClean)
