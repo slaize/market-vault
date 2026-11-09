@@ -25,6 +25,7 @@ export default function MarketListsManager() {
   const [feedback, setFeedback] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [pairedToken, setPairedToken] = useState<string | null>(null)
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null)
 
   // Modals state
   const [editingList, setEditingList] = useState<MarketList | null>(null)
@@ -51,6 +52,21 @@ export default function MarketListsManager() {
   useEffect(() => {
     loadLists()
   }, [loadLists])
+
+  useEffect(() => {
+    if (!openMenuId) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpenMenuId(null)
+    }
+    const handleClickOutside = () => setOpenMenuId(null)
+
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('click', handleClickOutside)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('click', handleClickOutside)
+    }
+  }, [openMenuId])
 
   const handleCreateList = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -235,6 +251,7 @@ export default function MarketListsManager() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {lists.map((list) => {
             const isActive = list.id === activeListId
+            const isMenuOpen = openMenuId === list.id
             return (
               <div
                 key={list.id}
@@ -251,10 +268,12 @@ export default function MarketListsManager() {
                   }
                 }}
                 style={{
+                  position: 'relative',
+                  zIndex: isMenuOpen ? 25 : 1,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '1rem',
+                  padding: '0.85rem 1rem',
                   borderRadius: 'var(--radius-md)',
                   background: isActive ? 'var(--accent-glow)' : 'var(--bg-card)',
                   border: isActive
@@ -264,93 +283,160 @@ export default function MarketListsManager() {
                   transition: 'background 0.15s ease, border-color 0.15s ease',
                 }}
               >
-                <div style={{ flex: 1, minWidth: 0, paddingRight: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '1rem' }}>{isActive ? '🟢' : '⚪'}</span>
-                    <strong style={{ fontSize: '0.98rem', color: 'var(--text-primary)' }}>{list.name}</strong>
-                    {isActive && (
-                      <span
-                        style={{
-                          fontSize: '0.68rem',
-                          padding: '0.15rem 0.5rem',
-                          borderRadius: '999px',
-                          background: 'var(--accent-primary)',
-                          color: '#ffffff',
-                          fontWeight: 700,
-                          letterSpacing: '0.04em',
-                        }}
-                      >
-                        ACTIVA
-                      </span>
-                    )}
-                    {list.remote_list_id && (
-                      <span
-                        style={{
-                          fontSize: '0.68rem',
-                          padding: '0.15rem 0.45rem',
-                          borderRadius: '999px',
-                          background: 'var(--accent-secondary-glow)',
-                          color: 'var(--accent-secondary)',
-                          fontWeight: 700,
-                        }}
-                        title="Sincronizada con RecipeVault"
-                      >
-                        🔗 RECIPEVAULT
-                      </span>
-                    )}
-                  </div>
-                  <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                    {isActive ? 'Seleccionada · Toca para comprar →' : 'Toca para abrir y comprar →'}
-                  </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0, flex: 1, paddingRight: '0.5rem' }}>
+                  <span
+                    title={list.remote_list_id ? 'Vinculada con RecipeVault' : 'Lista local (no vinculada)'}
+                    aria-label={list.remote_list_id ? 'Vinculada con RecipeVault' : 'Lista local'}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: list.remote_list_id ? 'var(--accent-secondary)' : 'var(--text-muted)',
+                      opacity: list.remote_list_id ? 1 : 0.45,
+                      flexShrink: 0,
+                    }}
+                  >
+                    <UiIcon name={list.remote_list_id ? 'link' : 'unlink'} size="1.15em" />
+                  </span>
+
+                  <strong
+                    style={{
+                      fontSize: '0.98rem',
+                      color: 'var(--text-primary)',
+                      fontWeight: 600,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {list.name}
+                  </strong>
                 </div>
 
-                <div
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button
-                    type="button"
-                    onClick={(e) => handleOpenShare(list, e)}
-                    className="btn btn-ghost"
-                    style={{ minWidth: '40px', minHeight: '40px', padding: '0.4rem', color: 'var(--accent-primary)' }}
-                    title="Compartir lista"
-                    aria-label={`Compartir lista ${list.name}`}
-                  >
-                    <UiIcon name="share" size="1.2em" />
-                  </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexShrink: 0 }}>
+                  {isActive && (
+                    <span
+                      style={{
+                        fontSize: '0.72rem',
+                        padding: '0.2rem 0.55rem',
+                        borderRadius: '999px',
+                        background: 'var(--accent-primary)',
+                        color: '#ffffff',
+                        fontWeight: 700,
+                        letterSpacing: '0.02em',
+                      }}
+                    >
+                      Activa
+                    </span>
+                  )}
 
-                  <button
-                    type="button"
-                    onClick={(e) => handleCopyList(list, e)}
-                    className="btn btn-ghost"
-                    style={{ minWidth: '40px', minHeight: '40px', padding: '0.4rem', color: 'var(--text-secondary)' }}
-                    title="Copiar texto"
-                    aria-label={`Copiar texto ${list.name}`}
-                  >
-                    <UiIcon name="copy" size="1.2em" />
-                  </button>
+                  {/* Options Menu Button & Dropdown */}
+                  <div style={{ position: 'relative' }}>
+                    <button
+                      type="button"
+                      className="btn btn-ghost"
+                      aria-label={`Opciones de lista ${list.name}`}
+                      aria-haspopup="menu"
+                      aria-expanded={isMenuOpen}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setOpenMenuId(isMenuOpen ? null : list.id)
+                      }}
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        padding: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 'var(--radius-sm)',
+                        color: 'var(--text-secondary)',
+                      }}
+                    >
+                      <UiIcon name="moreVertical" size="1.25em" />
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={(e) => handleOpenRename(list, e)}
-                    className="btn btn-ghost"
-                    style={{ minWidth: '40px', minHeight: '40px', padding: '0.4rem', color: 'var(--text-primary)' }}
-                    title="Renombrar lista"
-                    aria-label={`Renombrar lista ${list.name}`}
-                  >
-                    <UiIcon name="edit" size="1.2em" />
-                  </button>
+                    {isMenuOpen && (
+                      <div
+                        role="menu"
+                        aria-label={`Acciones para ${list.name}`}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                          position: 'absolute',
+                          top: 'calc(100% + 4px)',
+                          right: 0,
+                          minWidth: '165px',
+                          background: 'var(--bg-elevated)',
+                          border: '1px solid var(--border-default)',
+                          borderRadius: 'var(--radius-md)',
+                          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3)',
+                          padding: '0.35rem',
+                          zIndex: 50,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.15rem',
+                        }}
+                      >
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={(e) => {
+                            setOpenMenuId(null)
+                            handleOpenRename(list, e)
+                          }}
+                          title="Renombrar lista"
+                          style={menuItemStyle}
+                        >
+                          <UiIcon name="edit" size="1.1em" />
+                          <span>Renombrar</span>
+                        </button>
 
-                  <button
-                    type="button"
-                    onClick={(e) => handleOpenDelete(list, e)}
-                    className="btn btn-ghost"
-                    style={{ minWidth: '40px', minHeight: '40px', padding: '0.4rem', color: 'var(--danger)' }}
-                    title="Eliminar lista"
-                    aria-label={`Eliminar lista ${list.name}`}
-                  >
-                    <UiIcon name="trash" size="1.2em" />
-                  </button>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={(e) => {
+                            setOpenMenuId(null)
+                            handleOpenShare(list, e)
+                          }}
+                          title="Compartir lista"
+                          style={menuItemStyle}
+                        >
+                          <UiIcon name="share" size="1.1em" />
+                          <span>Compartir</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={(e) => {
+                            setOpenMenuId(null)
+                            handleCopyList(list, e)
+                          }}
+                          title="Copiar texto"
+                          style={menuItemStyle}
+                        >
+                          <UiIcon name="copy" size="1.1em" />
+                          <span>Copiar texto</span>
+                        </button>
+
+                        <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '0.25rem 0' }} />
+
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={(e) => {
+                            setOpenMenuId(null)
+                            handleOpenDelete(list, e)
+                          }}
+                          title="Eliminar lista"
+                          style={{ ...menuItemStyle, color: 'var(--danger)' }}
+                        >
+                          <UiIcon name="trash" size="1.1em" />
+                          <span>Eliminar</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )
@@ -397,6 +483,23 @@ export default function MarketListsManager() {
       )}
     </div>
   )
+}
+
+const menuItemStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.65rem',
+  width: '100%',
+  padding: '0.55rem 0.75rem',
+  borderRadius: 'var(--radius-sm)',
+  background: 'transparent',
+  border: 'none',
+  color: 'var(--text-primary)',
+  fontSize: '0.86rem',
+  fontWeight: 500,
+  cursor: 'pointer',
+  textAlign: 'left',
+  transition: 'background 0.12s ease',
 }
 
 function viIsPromptMocked(): boolean {

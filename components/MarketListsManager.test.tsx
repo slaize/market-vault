@@ -105,8 +105,11 @@ describe('MarketListsManager Component', () => {
     render(<MarketListsManager />)
     await waitFor(() => screen.getByText('Compra Semanal'))
 
-    const copyButtons = screen.getAllByTitle('Copiar texto')
-    fireEvent.click(copyButtons[0])
+    const optionsButtons = screen.getAllByLabelText(/Opciones de lista/i)
+    fireEvent.click(optionsButtons[0])
+
+    const copyBtn = screen.getByTitle('Copiar texto')
+    fireEvent.click(copyBtn)
 
     await waitFor(() => {
       expect(writeTextMock).toHaveBeenCalledWith(expect.stringContaining('Compra Semanal'))
@@ -121,8 +124,11 @@ describe('MarketListsManager Component', () => {
     render(<MarketListsManager />)
     await waitFor(() => screen.getByText('Barbacoa Sábado'))
 
-    const deleteButtons = screen.getAllByTitle('Eliminar lista')
-    fireEvent.click(deleteButtons[1]) // list-2
+    const optionsButtons = screen.getAllByLabelText(/Opciones de lista/i)
+    fireEvent.click(optionsButtons[1]) // list-2
+
+    const deleteBtn = screen.getByTitle('Eliminar lista')
+    fireEvent.click(deleteBtn)
 
     await waitFor(() => {
       expect(marketDb.deleteLocalList).toHaveBeenCalledWith('list-2')
@@ -144,8 +150,11 @@ describe('MarketListsManager Component', () => {
     render(<MarketListsManager />)
     await waitFor(() => screen.getByText('Compra Semanal'))
 
-    const editButtons = screen.getAllByTitle('Renombrar lista')
-    fireEvent.click(editButtons[0])
+    const optionsButtons = screen.getAllByLabelText(/Opciones de lista/i)
+    fireEvent.click(optionsButtons[0])
+
+    const editBtn = screen.getByTitle('Renombrar lista')
+    fireEvent.click(editBtn)
 
     await waitFor(() => {
       expect(marketDb.saveLocalList).toHaveBeenCalledWith({
