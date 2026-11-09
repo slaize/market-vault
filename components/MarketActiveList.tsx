@@ -376,6 +376,15 @@ export default function MarketActiveList() {
   const progressPct = total > 0 ? Math.round((completed / total) * 100) : 0
   const isAllDone = total > 0 && pendingItems.length === 0
 
+  const getProgressMessage = () => {
+    if (total === 0) return 'Lista vacía · Añade lo que necesites ✨'
+    if (isAllDone) return '¡Todo listo! Compra completada 🎉'
+    if (completed === 0) {
+      return total === 1 ? '1 producto pendiente' : `${total} productos pendientes`
+    }
+    return `${pendingItems.length} pendientes · ${completed} en la cesta`
+  }
+
   // Group pending by aisle
   const groupedPending = CATEGORY_ORDER.map((cat) => ({
     category: cat,
@@ -396,60 +405,77 @@ export default function MarketActiveList() {
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           borderBottom: '1px solid var(--border-subtle)',
-          padding: '0.75rem 0 0.6rem',
+          padding: '0.85rem 0 0.65rem',
           marginBottom: '1rem',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <span style={{ fontSize: '1.25rem' }}>🛒</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
               <h1
                 style={{
-                  fontSize: '1.2rem',
-                  fontWeight: 800,
+                  fontSize: '1.25rem',
+                  fontWeight: 700,
                   color: 'var(--text-primary)',
                   margin: 0,
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
+                  letterSpacing: '-0.01em',
                 }}
               >
                 {activeList?.name || 'Mi Compra'}
               </h1>
+              {isPaired && (
+                <span
+                  title="Sincronizada con RecipeVault"
+                  aria-label="Sincronizada con RecipeVault"
+                  style={{
+                    color: 'var(--accent-primary)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    flexShrink: 0,
+                    opacity: 0.9,
+                  }}
+                >
+                  <UiIcon name="link" size="0.95em" />
+                </span>
+              )}
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(true)}
                 className="btn btn-ghost"
-                style={{ minWidth: '32px', minHeight: '32px', padding: '0.2rem', color: 'var(--text-muted)' }}
+                style={{
+                  width: '28px',
+                  height: '28px',
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--text-muted)',
+                  borderRadius: 'var(--radius-sm)',
+                  flexShrink: 0,
+                }}
                 title="Editar nombre de la lista"
                 aria-label="Editar nombre de la lista"
               >
-                <UiIcon name="edit" size="0.85em" />
+                <UiIcon name="edit" size="0.9em" />
               </button>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.15rem' }}>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>
-                {completed}/{total} completados ({progressPct}%)
-              </p>
-              {isPaired && (
-                <span
-                  style={{
-                    fontSize: '0.66rem',
-                    padding: '0.1rem 0.4rem',
-                    borderRadius: '999px',
-                    background: 'var(--accent-glow)',
-                    color: 'var(--accent-primary)',
-                    fontWeight: 600,
-                  }}
-                >
-                  🔗 Sincronizado
-                </span>
-              )}
-            </div>
+            <p
+              style={{
+                fontSize: '0.78rem',
+                color: isAllDone ? 'var(--accent-primary)' : 'var(--text-muted)',
+                fontWeight: isAllDone ? 600 : 400,
+                margin: '0.2rem 0 0',
+                transition: 'color 0.2s ease',
+              }}
+            >
+              {getProgressMessage()}
+            </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
             {/* Sync Button */}
             {isPaired && (
               <button
@@ -457,12 +483,29 @@ export default function MarketActiveList() {
                 onClick={handleManualSync}
                 disabled={isSyncing}
                 className="btn btn-ghost"
-                style={{ minWidth: '38px', minHeight: '38px', padding: '0.4rem', color: 'var(--accent-primary)' }}
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: 'var(--radius-sm)',
+                  color: 'var(--accent-primary)',
+                }}
                 title="Sincronizar con RecipeVault"
                 aria-label="Sincronizar con RecipeVault"
               >
-                <span style={{ display: 'inline-block', transform: isSyncing ? 'rotate(360deg)' : 'none', transition: 'transform 0.6s linear' }}>
-                  🔄
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transform: isSyncing ? 'rotate(360deg)' : 'none',
+                    transition: isSyncing ? 'transform 0.6s linear' : 'none',
+                  }}
+                >
+                  <UiIcon name="refresh" size="1.15em" />
                 </span>
               </button>
             )}
@@ -472,59 +515,48 @@ export default function MarketActiveList() {
               type="button"
               onClick={() => setIsShareModalOpen(true)}
               className="btn btn-ghost"
-              style={{ minWidth: '38px', minHeight: '38px', padding: '0.4rem', color: 'var(--accent-primary)' }}
+              style={{
+                width: '36px',
+                height: '36px',
+                padding: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 'var(--radius-sm)',
+                color: 'var(--text-secondary)',
+              }}
               title="Compartir lista"
               aria-label="Compartir lista"
             >
-              <span style={{ fontSize: '1.15rem' }}>📤</span>
+              <UiIcon name="share" size="1.15em" />
             </button>
-
-            {/* List Selector */}
-            {lists.length > 1 && (
-              <select
-                value={activeList?.id}
-                onChange={(e) => handleSelectActiveList(e.target.value)}
-                style={{
-                  fontSize: '0.8rem',
-                  padding: '0.4rem 0.6rem',
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'var(--input-bg)',
-                  color: 'var(--text-primary)',
-                  border: '1px solid var(--border-default)',
-                  outline: 'none',
-                  cursor: 'pointer',
-                  maxWidth: '130px',
-                }}
-              >
-                {lists.map((l) => (
-                  <option key={l.id} value={l.id} style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)' }}>
-                    {l.name}
-                  </option>
-                ))}
-              </select>
-            )}
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div
-          style={{
-            height: '4px',
-            background: 'var(--border-subtle)',
-            borderRadius: '999px',
-            marginTop: '0.65rem',
-            overflow: 'hidden',
-          }}
-        >
+        {total > 0 && (
           <div
             style={{
-              height: '100%',
-              width: `${progressPct}%`,
-              background: 'linear-gradient(90deg, var(--accent-primary) 0%, var(--accent-hover) 100%)',
-              transition: 'width 0.25s ease',
+              height: '3px',
+              background: 'var(--border-subtle)',
+              borderRadius: '999px',
+              marginTop: '0.65rem',
+              overflow: 'hidden',
             }}
-          />
-        </div>
+          >
+            <div
+              style={{
+                height: '100%',
+                width: `${progressPct}%`,
+                background: isAllDone
+                  ? 'var(--accent-primary)'
+                  : 'linear-gradient(90deg, var(--accent-primary) 0%, var(--accent-hover) 100%)',
+                borderRadius: '999px',
+                transition: 'width 0.25s ease',
+              }}
+            />
+          </div>
+        )}
       </header>
 
       {/* Quick Add Form */}

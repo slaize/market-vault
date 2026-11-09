@@ -47,7 +47,7 @@ describe('MarketActiveList Component', () => {
     await waitFor(() => {
       expect(screen.getByText('Compra Semanal')).toBeInTheDocument()
       expect(screen.getByText('Manzanas Golden')).toBeInTheDocument()
-      expect(screen.getByText(/0\/1 completados/i)).toBeInTheDocument()
+      expect(screen.getByText(/1 producto pendiente/i)).toBeInTheDocument()
     })
   })
 
