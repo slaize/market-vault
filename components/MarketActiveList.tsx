@@ -58,6 +58,15 @@ function renderIngredientIcon(emoji: string, size = '1.25rem') {
   return emoji || '🛒'
 }
 
+function normalizeItemName(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+}
+
 export default function MarketActiveList() {
   const [lists, setLists] = useState<MarketList[]>([])
   const [activeList, setActiveList] = useState<MarketList | null>(null)
@@ -211,30 +220,122 @@ export default function MarketActiveList() {
     setItems(listItems)
   }
 
+  const addOrReuseItem = async (input: {
+    name: string
+    quantity?: number | null
+    unit?: string | null
+    category?: ShoppingCategory
+  }) => {
+    if (!activeList) return
+    const targetNorm = normalizeItemName(input.name)
+    if (!targetNorm) return
+
+    const isRemoteActiveList = Boolean(isPaired && pairedToken && activeList.remote_list_id)
+    const existing = items.find((i) => normalizeItemName(i.name) === targetNorm)
+
+    if (existing) {
+      if (existing.is_checked) {
+        const nextQty = input.quantity ?? existing.quantity ?? null
+        const nextUnit =
+          input.unit !== undefined && input.unit !== null ? input.unit : existing.unit ?? null
+        const reactivated = await saveLocalItem({
+          id: existing.id,
+          list_id: activeList.id,
+          remote_item_id: existing.remote_item_id,
+          name: existing.name,
+          quantity: nextQty,
+          unit: nextUnit,
+          category: input.category || existing.category,
+          is_checked: false,
+          sort_order: Date.now(),
+        })
+        setItems((prev) => prev.map((i) => (i.id === existing.id ? reactivated : i)))
+        showToast(`«${existing.name}» reactivado en tu lista`)
+        getFrequentProducts(8).then(setFrequentProducts)
+
+        if (isRemoteActiveList && existing.remote_item_id) {
+          remoteToggleItem(existing.remote_item_id, false)
+          if (nextQty !== existing.quantity || nextUnit !== existing.unit) {
+            remoteUpdateItem(existing.remote_item_id, {
+              name: reactivated.name,
+              quantity: reactivated.quantity,
+              unit: reactivated.unit,
+              category: reactivated.category,
+            })
+          }
+        }
+        return
+      }
+
+      const existingUnit = (existing.unit || '').toLowerCase()
+      const incomingUnit = (input.unit || '').toLowerCase()
+      const unitsCompatible = !incomingUnit || !existingUnit || incomingUnit === existingUnit
+
+      if (input.quantity && unitsCompatible) {
+        const mergedQty = Math.round(((existing.quantity || 0) + input.quantity) * 100) / 100
+        const mergedUnit = existing.unit || input.unit || null
+        const updated = await saveLocalItem({
+          id: existing.id,
+          list_id: activeList.id,
+          remote_item_id: existing.remote_item_id,
+          name: existing.name,
+          quantity: mergedQty,
+          unit: mergedUnit,
+          category: existing.category,
+          is_checked: false,
+          sort_order: existing.sort_order,
+        })
+        setItems((prev) => prev.map((i) => (i.id === existing.id ? updated : i)))
+        showToast(
+          `Cantidad actualizada: ${mergedQty}${mergedUnit ? ' ' + mergedUnit : ''} ${existing.name}`
+        )
+
+        if (isRemoteActiveList && existing.remote_item_id) {
+          remoteUpdateItem(existing.remote_item_id, {
+            name: updated.name,
+            quantity: updated.quantity,
+            unit: updated.unit,
+            category: updated.category,
+          })
+        }
+        return
+      }
+
+      showToast(`«${existing.name}» ya está en tu lista`)
+      return
+    }
+
+    const saved = await saveLocalItem({
+      list_id: activeList.id,
+      name: input.name,
+      quantity: input.quantity ?? null,
+      unit: input.unit ?? null,
+      category: input.category,
+    })
+    setItems((prev) => [...prev, saved])
+    showToast(`«${saved.name}» añadido`)
+    getFrequentProducts(8).then(setFrequentProducts)
+
+    if (isRemoteActiveList) {
+      remoteAddItem({
+        name: saved.name,
+        quantity: saved.quantity,
+        unit: saved.unit,
+      })
+    }
+  }
+
   const handleAddProductDirectly = async (
     name: string,
     category?: ShoppingCategory,
     unit?: string | null
   ) => {
-    if (!activeList) return
-    const saved = await saveLocalItem({
-      list_id: activeList.id,
+    await addOrReuseItem({
       name,
       category,
       unit,
       quantity: unit ? 1 : null,
     })
-    setItems((prev) => [...prev, saved])
-    showToast(`«${name}» añadido`)
-    getFrequentProducts(8).then(setFrequentProducts)
-
-    if (isPaired && pairedToken) {
-      remoteAddItem({
-        name,
-        quantity: unit ? 1 : null,
-        unit: unit ?? null,
-      })
-    }
   }
 
   const handleAddItem = async (e: React.FormEvent) => {
@@ -245,24 +346,12 @@ export default function MarketActiveList() {
     setShowSuggestions(false)
 
     const parsed = parseItemInput(clean)
-    const saved = await saveLocalItem({
-      list_id: activeList.id,
+    await addOrReuseItem({
       name: parsed.name,
       quantity: parsed.quantity,
       unit: parsed.unit,
       category: parsed.category,
     })
-    setItems((prev) => [...prev, saved])
-    getFrequentProducts(8).then(setFrequentProducts)
-
-    // Background sync to remote if paired
-    if (isPaired && pairedToken) {
-      remoteAddItem({
-        name: parsed.name,
-        quantity: parsed.quantity,
-        unit: parsed.unit,
-      })
-    }
   }
 
   const handleToggle = async (item: MarketItem) => {
@@ -776,32 +865,40 @@ export default function MarketActiveList() {
               scrollbarWidth: 'none',
             }}
           >
-            {frequentProducts.map((p) => (
-              <button
-                key={p.name_normalized}
-                type="button"
-                onClick={() => handleAddProductDirectly(p.name, p.category, p.default_unit)}
-                className="btn btn-ghost"
-                style={{
-                  flexShrink: 0,
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                  padding: '0.35rem 0.75rem',
-                  borderRadius: '999px',
-                  background: 'var(--bg-card)',
-                  border: '1px solid var(--border-default)',
-                  color: 'var(--text-primary)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  whiteSpace: 'nowrap',
-                }}
-                title={`Añadir ${p.name}`}
-              >
-                <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>+</span>
-                <span>{p.name}</span>
-              </button>
-            ))}
+            {frequentProducts.map((p) => {
+              const isAlreadyPending = pendingItems.some(
+                (item) => normalizeItemName(item.name) === normalizeItemName(p.name)
+              )
+              return (
+                <button
+                  key={p.name_normalized}
+                  type="button"
+                  onClick={() => handleAddProductDirectly(p.name, p.category, p.default_unit)}
+                  className="btn btn-ghost"
+                  style={{
+                    flexShrink: 0,
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: '999px',
+                    background: isAlreadyPending ? 'var(--accent-glow)' : 'var(--bg-card)',
+                    border: isAlreadyPending ? '1px solid var(--accent-primary)' : '1px solid var(--border-default)',
+                    color: isAlreadyPending ? 'var(--accent-primary)' : 'var(--text-primary)',
+                    opacity: isAlreadyPending ? 0.85 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    whiteSpace: 'nowrap',
+                  }}
+                  title={isAlreadyPending ? `${p.name} ya está en la lista` : `Añadir ${p.name}`}
+                >
+                  <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>
+                    {isAlreadyPending ? '✓' : '+'}
+                  </span>
+                  <span>{p.name}</span>
+                </button>
+              )
+            })}
           </div>
         </div>
       )}

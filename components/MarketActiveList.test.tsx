@@ -201,4 +201,81 @@ describe('MarketActiveList Component', () => {
     const img = document.querySelector('img[src="/icons/oil.png"]')
     expect(img).toBeInTheDocument()
   })
+
+  it('reuses and unchecks an existing checked item instead of creating a duplicate', async () => {
+    vi.mocked(marketDb.getLocalItems).mockResolvedValue([
+      {
+        id: 'item-checked-1',
+        list_id: 'list-1',
+        name: 'Leche entera',
+        quantity: 2,
+        unit: 'l',
+        category: 'lacteos',
+        is_checked: true,
+        sort_order: 1,
+        updated_at: new Date().toISOString(),
+      },
+    ])
+    vi.mocked(marketDb.saveLocalItem).mockResolvedValue({
+      id: 'item-checked-1',
+      list_id: 'list-1',
+      name: 'Leche entera',
+      quantity: 2,
+      unit: 'l',
+      category: 'lacteos',
+      is_checked: false,
+      sort_order: 2,
+      updated_at: new Date().toISOString(),
+    })
+
+    render(<MarketActiveList />)
+    await waitFor(() => screen.getByPlaceholderText(/Añadir producto.../i))
+
+    const input = screen.getByPlaceholderText(/Añadir producto.../i)
+    fireEvent.change(input, { target: { value: 'leche entera' } })
+    fireEvent.submit(input.closest('form')!)
+
+    await waitFor(() => {
+      expect(marketDb.saveLocalItem).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'item-checked-1',
+          list_id: 'list-1',
+          is_checked: false,
+        })
+      )
+    })
+  })
+
+  it('merges quantity when adding an item that is already pending with compatible unit', async () => {
+    vi.mocked(marketDb.saveLocalItem).mockResolvedValue({
+      id: 'item-1',
+      list_id: 'list-1',
+      name: 'Manzanas Golden',
+      quantity: 2.5,
+      unit: 'kg',
+      category: 'frutas-verduras',
+      is_checked: false,
+      sort_order: 1,
+      updated_at: new Date().toISOString(),
+    })
+
+    render(<MarketActiveList />)
+    await waitFor(() => screen.getByText('Manzanas Golden'))
+
+    const input = screen.getByPlaceholderText(/Añadir producto.../i)
+    fireEvent.change(input, { target: { value: '1.5kg manzanas golden' } })
+    fireEvent.submit(input.closest('form')!)
+
+    await waitFor(() => {
+      expect(marketDb.saveLocalItem).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'item-1',
+          list_id: 'list-1',
+          quantity: 2.5,
+          unit: 'kg',
+          is_checked: false,
+        })
+      )
+    })
+  })
 })
