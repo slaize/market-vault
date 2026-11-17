@@ -19,7 +19,7 @@ describe('MarketSettings Component', () => {
   it('renders pairing input when currently in local_only mode', async () => {
     render(<MarketSettingsComponent />)
     await waitFor(() => {
-      expect(screen.getByText(/Modo actual: Solo en este dispositivo/i)).toBeInTheDocument()
+      expect(screen.getByText(/Solo en este dispositivo/i)).toBeInTheDocument()
       expect(screen.getByPlaceholderText(/RV-XXXXXX/i)).toBeInTheDocument()
     })
   })
