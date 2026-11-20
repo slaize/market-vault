@@ -98,9 +98,10 @@ export default function MarketListsManager() {
   const handleSetActive = async (id: string, openShopping = true) => {
     setActiveListId(id)
     await saveMarketSettings({ active_list_id: id })
-    notify('Lista seleccionada para comprar')
     if (openShopping && typeof router?.push === 'function') {
       router.push('/compra')
+    } else {
+      notify('Lista seleccionada para comprar')
     }
   }
 
@@ -192,7 +193,7 @@ export default function MarketListsManager() {
       {feedback && (
         <div
           role="status"
-          className="market-toast"
+          className="market-banner"
           style={{
             background: 'var(--accent-glow)',
             border: '1px solid var(--accent-primary)',

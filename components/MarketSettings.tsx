@@ -125,7 +125,7 @@ export default function MarketSettingsComponent() {
       {message && (
         <div
           role="status"
-          className="market-toast"
+          className="market-banner"
           style={{
             background: message.isError ? 'var(--danger-bg)' : 'var(--accent-glow)',
             border: `1px solid ${message.isError ? 'var(--danger)' : 'var(--accent-primary)'}`,
