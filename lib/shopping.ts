@@ -676,6 +676,62 @@ function parseQtyNumber(rawQty: string): number | null {
   return isNaN(parsed) ? null : parsed
 }
 
+const LOWERCASE_CONNECTORS = new Set([
+  'a',
+  'al',
+  'ante',
+  'bajo',
+  'con',
+  'de',
+  'del',
+  'desde',
+  'e',
+  'el',
+  'en',
+  'entre',
+  'hacia',
+  'hasta',
+  'la',
+  'las',
+  'lo',
+  'los',
+  'ni',
+  'o',
+  'para',
+  'por',
+  'que',
+  'sin',
+  'sobre',
+  'tras',
+  'u',
+  'un',
+  'una',
+  'unas',
+  'unos',
+  'y',
+])
+
+/**
+ * Unifies product/list names to Spanish Title Case:
+ * capitalizes the first letter of each word except connectors/prepositions/articles
+ * (unless they are the first word).
+ */
+export function formatItemName(raw: string): string {
+  const clean = raw.trim().replace(/\s+/g, ' ')
+  if (!clean) return ''
+
+  return clean
+    .split(' ')
+    .map((word, index) => {
+      const lower = word.toLowerCase()
+      if (index > 0 && LOWERCASE_CONNECTORS.has(lower)) {
+        return lower
+      }
+      return lower.charAt(0).toUpperCase() + lower.slice(1)
+    })
+    .join(' ')
+}
+
 export function parseItemInput(raw: string): {
   name: string
   quantity: number | null
@@ -695,9 +751,9 @@ export function parseItemInput(raw: string): {
   if (leadingMatch && leadingMatch[3]?.trim()) {
     const qty = parseQtyNumber(leadingMatch[1])
     const rawUnit = normalizeUnit(leadingMatch[2] || null)
-    let name = leadingMatch[3].trim().replace(/^de\s+/i, '')
+    const name = leadingMatch[3].trim().replace(/^de\s+/i, '')
     return {
-      name: name.charAt(0).toUpperCase() + name.slice(1),
+      name: formatItemName(name),
       quantity: qty,
       unit: rawUnit,
       category: categorize(name),
@@ -711,7 +767,7 @@ export function parseItemInput(raw: string): {
     const qty = parseQtyNumber(trailingMatch[2])
     const rawUnit = normalizeUnit(trailingMatch[3] || null)
     return {
-      name: name.charAt(0).toUpperCase() + name.slice(1),
+      name: formatItemName(name),
       quantity: qty,
       unit: rawUnit,
       category: categorize(name),
@@ -720,7 +776,7 @@ export function parseItemInput(raw: string): {
 
   // Fallback
   return {
-    name: clean.charAt(0).toUpperCase() + clean.slice(1),
+    name: formatItemName(clean),
     quantity: null,
     unit: null,
     category: categorize(clean),

@@ -1,4 +1,4 @@
-import { categorize, type ShoppingCategory } from './shopping'
+import { categorize, formatItemName, type ShoppingCategory } from './shopping'
 
 export interface MarketList {
   id: string
@@ -134,7 +134,7 @@ export async function saveLocalList(
   const now = new Date().toISOString()
   const list: MarketList = {
     id: input.id || crypto.randomUUID(),
-    name: input.name.trim(),
+    name: formatItemName(input.name),
     week_start: input.week_start || null,
     is_archived: Boolean(input.is_archived),
     remote_list_id: input.remote_list_id || null,
@@ -184,7 +184,7 @@ export async function getLocalItems(listId: string): Promise<MarketItem[]> {
 
 export async function updateLocalListName(id: string, name: string): Promise<MarketList | null> {
   const db = await openDb()
-  const clean = name.trim()
+  const clean = formatItemName(name)
   if (!clean) return null
   return new Promise((resolve, reject) => {
     const tx = db.transaction('lists', 'readwrite')
@@ -221,7 +221,7 @@ export async function saveLocalItem(
   }
 ): Promise<MarketItem> {
   const db = await openDb()
-  const cleanName = input.name.trim()
+  const cleanName = formatItemName(input.name)
   const now = new Date().toISOString()
   const item: MarketItem = {
     id: input.id || crypto.randomUUID(),
@@ -351,7 +351,7 @@ export async function recordProductHistory(
   category?: ShoppingCategory,
   unit?: string | null
 ): Promise<ProductHistoryItem | null> {
-  const cleanName = name.trim()
+  const cleanName = formatItemName(name)
   if (!cleanName) return null
   const normalized = normalizeProductText(cleanName)
 
@@ -369,7 +369,7 @@ export async function recordProductHistory(
         const resolvedUnit = unit !== undefined ? unit : (existing?.default_unit || null)
 
         const updated: ProductHistoryItem = {
-          name: existing?.name || cleanName,
+          name: cleanName,
           name_normalized: normalized,
           category: resolvedCategory,
           default_unit: resolvedUnit,

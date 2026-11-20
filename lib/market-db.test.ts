@@ -289,9 +289,9 @@ describe('MarketVault Local-First IndexedDB Engine', () => {
     const suggestions = await getProductSuggestions('leche')
     expect(suggestions.length).toBeGreaterThanOrEqual(2)
     // Most frequent first
-    expect(suggestions[0].name).toBe('Leche entera')
+    expect(suggestions[0].name).toBe('Leche Entera')
     expect(suggestions[0].count).toBe(2)
-    expect(suggestions[1].name).toBe('Leche de avena')
+    expect(suggestions[1].name).toBe('Leche de Avena')
 
     // Suggestions matching "platano" (accent-insensitive)
     const fruitSuggestions = await getProductSuggestions('platano')
@@ -300,6 +300,6 @@ describe('MarketVault Local-First IndexedDB Engine', () => {
     // Frequent products returns top products
     const frequent = await getFrequentProducts(3)
     expect(frequent.length).toBeGreaterThanOrEqual(2)
-    expect(frequent[0].name).toBe('Leche entera')
+    expect(frequent[0].name).toBe('Leche Entera')
   })
 })

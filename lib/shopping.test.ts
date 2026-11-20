@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   parseItemInput,
   formatShareListText,
+  formatItemName,
   categorize,
   getIngredientEmoji,
 } from './shopping'
@@ -42,10 +43,19 @@ describe('Shopping Utilities in MarketVault', () => {
 
     it('falls back cleanly when no quantity is specified (e.g. "Pechuga de pollo")', () => {
       const res = parseItemInput('Pechuga de pollo')
-      expect(res.name).toBe('Pechuga de pollo')
+      expect(res.name).toBe('Pechuga de Pollo')
       expect(res.quantity).toBeNull()
       expect(res.unit).toBeNull()
       expect(res.category).toBe('carniceria')
+    })
+
+    it('unifies title case while keeping connectors lowercase (e.g. "leche de soja" -> "Leche de Soja")', () => {
+      expect(formatItemName('leche de soja')).toBe('Leche de Soja')
+      expect(formatItemName('LECHE DE SOJA')).toBe('Leche de Soja')
+      expect(formatItemName('aceite de oliva virgen extra')).toBe('Aceite de Oliva Virgen Extra')
+      expect(formatItemName('pan con tomate y ajo')).toBe('Pan con Tomate y Ajo')
+      expect(formatItemName('de todo un poco')).toBe('De Todo un Poco')
+      expect(parseItemInput('2l leche de soja').name).toBe('Leche de Soja')
     })
 
     it('correctly parses complex units without word truncation (e.g. latas, litros, botellas, gramos)', () => {

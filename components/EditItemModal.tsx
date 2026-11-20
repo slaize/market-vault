@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import {
   CATEGORY_ORDER,
   CATEGORY_LABELS,
+  formatItemName,
   type ShoppingCategory,
 } from '@/lib/shopping'
 import type { MarketItem } from '@/lib/market-db'
@@ -65,7 +66,7 @@ export default function EditItemModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const cleanName = name.trim()
+    const cleanName = formatItemName(name)
     if (!cleanName) return
 
     setSaving(true)
