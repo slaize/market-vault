@@ -143,6 +143,7 @@ describe('Shopping Utilities in MarketVault', () => {
       expect(getIngredientEmoji('bebida de soja', 'bebidas')).toBe('🥛')
       expect(getIngredientEmoji('pizza', 'panaderia')).toBe('🍕')
       expect(getIngredientEmoji('desconocido x', 'otros')).toBe('🛒')
+      expect(getIngredientEmoji('Leche de Soja', 'lacteos', { 'leche de soja': '🌱' })).toBe('🌱')
     })
 
     it('categorizes Creme Fraiche and cheeses into lacteos', () => {

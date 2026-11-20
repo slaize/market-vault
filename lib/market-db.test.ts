@@ -15,6 +15,7 @@ import {
   recordProductHistory,
   getProductSuggestions,
   getFrequentProducts,
+  saveCustomProductIcon,
 } from './market-db'
 
 // Polyfill in-memory IndexedDB for jsdom environment if not provided
@@ -301,5 +302,15 @@ describe('MarketVault Local-First IndexedDB Engine', () => {
     const frequent = await getFrequentProducts(3)
     expect(frequent.length).toBeGreaterThanOrEqual(2)
     expect(frequent[0].name).toBe('Leche Entera')
+  })
+
+  it('persists and clears custom product icons in settings', async () => {
+    await saveCustomProductIcon('Leche de Soja', '🌱')
+    let settings = await getMarketSettings()
+    expect(settings.custom_icons?.['leche de soja']).toBe('🌱')
+
+    await saveCustomProductIcon('Leche de Soja', null)
+    settings = await getMarketSettings()
+    expect(settings.custom_icons?.['leche de soja']).toBeUndefined()
   })
 })

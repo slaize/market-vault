@@ -29,6 +29,7 @@ export interface MarketSettings {
   paired_code: string | null
   paired_token?: string | null
   last_synced_at: string | null
+  custom_icons?: Record<string, string>
 }
 
 export interface ProductHistoryItem {
@@ -344,6 +345,27 @@ export async function saveMarketSettings(settings: Partial<MarketSettings>): Pro
     tx.oncomplete = () => resolve(updated)
     tx.onerror = () => reject(tx.error)
   })
+}
+
+export async function saveCustomProductIcon(
+  productName: string,
+  icon: string | null
+): Promise<Record<string, string>> {
+  const normalized = normalizeProductText(productName)
+  if (!normalized) return (await getMarketSettings()).custom_icons || {}
+
+  const current = await getMarketSettings()
+  const nextIcons = { ...(current.custom_icons || {}) }
+
+  const cleanIcon = icon?.trim() || ''
+  if (cleanIcon) {
+    nextIcons[normalized] = cleanIcon
+  } else {
+    delete nextIcons[normalized]
+  }
+
+  await saveMarketSettings({ custom_icons: nextIcons })
+  return nextIcons
 }
 
 export async function recordProductHistory(

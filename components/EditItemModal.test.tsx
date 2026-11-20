@@ -77,4 +77,32 @@ describe('EditItemModal', () => {
 
     expect(screen.queryByText(/Editar producto/i)).not.toBeInTheDocument()
   })
+
+  it('allows changing and saving a custom product icon', async () => {
+    const handleSave = vi.fn()
+    const handleSaveIcon = vi.fn()
+    const handleClose = vi.fn()
+
+    render(
+      <EditItemModal
+        isOpen={true}
+        item={mockItem}
+        onClose={handleClose}
+        onSave={handleSave}
+        onSaveIcon={handleSaveIcon}
+      />
+    )
+
+    const iconTrigger = screen.getByRole('button', { name: /Cambiar icono del producto/i })
+    fireEvent.click(iconTrigger)
+
+    const iconInput = screen.getByLabelText(/Icono personalizado/i)
+    fireEvent.change(iconInput, { target: { value: '🌱' } })
+
+    const form = screen.getByRole('dialog').querySelector('form')!
+    fireEvent.submit(form)
+    await Promise.resolve()
+
+    expect(handleSaveIcon).toHaveBeenCalledWith('Creme Fraiche', '🌱')
+  })
 })

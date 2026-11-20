@@ -14,6 +14,8 @@ import {
   updateLocalListName,
   getProductSuggestions,
   getFrequentProducts,
+  saveCustomProductIcon,
+  normalizeProductText,
   type MarketList,
   type MarketItem,
   type ProductHistoryItem,
@@ -88,6 +90,7 @@ export default function MarketActiveList() {
   const [undoItem, setUndoItem] = useState<{ item: MarketItem; action: 'checked' | 'deleted' } | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [editingItem, setEditingItem] = useState<MarketItem | null>(null)
+  const [customIcons, setCustomIcons] = useState<Record<string, string>>({})
 
   const showToast = (msg: string) => {
     setToastMessage(msg)
@@ -106,6 +109,7 @@ export default function MarketActiveList() {
       const settings = await getMarketSettings()
       setIsPaired(settings.sync_mode === 'paired_household')
       setPairedToken(settings.paired_token || null)
+      setCustomIcons(settings.custom_icons || {})
 
       const current = allLists.find((l) => l.id === settings.active_list_id) || allLists[0]
       setActiveList(current)
@@ -743,7 +747,7 @@ export default function MarketActiveList() {
               }}
             >
               {suggestions.map((sug) => {
-                const emoji = getIngredientEmoji(sug.name, sug.category)
+                const emoji = getIngredientEmoji(sug.name, sug.category, customIcons)
                 return (
                   <div
                     key={sug.name_normalized}
@@ -970,7 +974,7 @@ export default function MarketActiveList() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
               {group.items.map((item) => {
-                const itemEmoji = getIngredientEmoji(item.name, group.category)
+                const itemEmoji = getIngredientEmoji(item.name, group.category, customIcons)
                 return (
                   <div
                     key={item.id}
@@ -1106,7 +1110,7 @@ export default function MarketActiveList() {
           {showCheckedSection && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
               {checkedItems.map((item) => {
-                const itemEmoji = getIngredientEmoji(item.name, item.category)
+                const itemEmoji = getIngredientEmoji(item.name, item.category, customIcons)
                 return (
                   <div
                     key={item.id}
@@ -1263,6 +1267,7 @@ export default function MarketActiveList() {
           items={items}
           pairedToken={pairedToken}
           isRemote={Boolean(activeList.remote_list_id)}
+          customIcons={customIcons}
           onToast={showToast}
         />
       )}
@@ -1271,8 +1276,13 @@ export default function MarketActiveList() {
       <EditItemModal
         isOpen={Boolean(editingItem)}
         item={editingItem}
+        customIcon={editingItem ? (customIcons[normalizeProductText(editingItem.name)] || null) : null}
         onClose={() => setEditingItem(null)}
         onSave={handleSaveItemEdit}
+        onSaveIcon={async (productName, icon) => {
+          const next = await saveCustomProductIcon(productName, icon)
+          setCustomIcons(next)
+        }}
       />
     </div>
   )

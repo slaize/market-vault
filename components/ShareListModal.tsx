@@ -13,6 +13,7 @@ interface ShareListModalProps {
   items: MarketItem[]
   pairedToken?: string | null
   isRemote?: boolean
+  customIcons?: Record<string, string>
   onToast: (msg: string) => void
 }
 
@@ -23,6 +24,7 @@ export default function ShareListModal({
   items,
   pairedToken,
   isRemote = true,
+  customIcons,
   onToast,
 }: ShareListModalProps) {
   const [copiedText, setCopiedText] = useState(false)
@@ -39,7 +41,7 @@ export default function ShareListModal({
 
   if (!isOpen) return null
 
-  const shareText = formatShareListText(listName, items)
+  const shareText = formatShareListText(listName, items, customIcons)
   const liveShareUrl = isRemote && pairedToken ? `${RECIPE_VAULT_URL}/s/${pairedToken}` : null
 
   const handleWhatsApp = () => {

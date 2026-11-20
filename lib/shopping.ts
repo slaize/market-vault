@@ -482,9 +482,18 @@ export const INGREDIENT_EMOJI_MAP: Record<string, string> = {
   'castana': '🌰',
 }
 
-export function getIngredientEmoji(name: string, category: string): string {
+export function getIngredientEmoji(
+  name: string,
+  category: string,
+  customIcons?: Record<string, string>
+): string {
   const normalized = name.toLowerCase().trim()
   const unaccented = normalized.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+
+  if (customIcons) {
+    const custom = customIcons[unaccented] || customIcons[normalized]
+    if (custom) return custom
+  }
 
   for (const [keyword, emoji] of Object.entries(INGREDIENT_EMOJI_MAP)) {
     const kNorm = keyword.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -913,7 +922,8 @@ export function parseItemInput(raw: string): {
 
 export function formatShareListText(
   listName: string,
-  items: Array<{ name: string; quantity: number | null; unit: string | null; is_checked: boolean; category?: string }>
+  items: Array<{ name: string; quantity: number | null; unit: string | null; is_checked: boolean; category?: string }>,
+  customIcons?: Record<string, string>
 ): string {
   const pending = items.filter((i) => !i.is_checked)
   if (pending.length === 0) {
@@ -928,7 +938,7 @@ export function formatShareListText(
       const meta = CATEGORY_LABELS[cat] || { label: cat, emoji: '🛒' }
       lines.push(`${meta.emoji} *${meta.label}*:`)
       for (const item of catItems) {
-        const rawEmoji = getIngredientEmoji(item.name, cat)
+        const rawEmoji = getIngredientEmoji(item.name, cat, customIcons)
         const emoji = rawEmoji.startsWith('/') ? (rawEmoji.includes('oil') ? '🫒' : '🥫') : rawEmoji
         const qty = item.quantity ? `${item.quantity}${item.unit ? ' ' + item.unit : ''} ` : ''
         lines.push(`  • ${emoji} ${qty}${item.name}`)

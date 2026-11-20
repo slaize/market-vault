@@ -5,6 +5,7 @@ import {
   CATEGORY_ORDER,
   CATEGORY_LABELS,
   formatItemName,
+  getIngredientEmoji,
   type ShoppingCategory,
 } from '@/lib/shopping'
 import type { MarketItem } from '@/lib/market-db'
@@ -12,6 +13,7 @@ import type { MarketItem } from '@/lib/market-db'
 interface EditItemModalProps {
   isOpen: boolean
   item: MarketItem | null
+  customIcon?: string | null
   onClose: () => void
   onSave: (
     itemId: string,
@@ -22,18 +24,30 @@ interface EditItemModalProps {
       unit: string | null
     }
   ) => Promise<void> | void
+  onSaveIcon?: (productName: string, icon: string | null) => Promise<void> | void
 }
+
+const QUICK_ICONS = [
+  '🥛', '🌱', '🥚', '🧀', '🧈', '🍞', '🥐', '🍎',
+  '🍌', '🥑', '🍅', '🥔', '🍗', '🥩', '🐟', '🍝',
+  '🍚', '🍕', '🍫', '🍪', '☕', '🧃', '🍺', '🍷',
+  '🧴', '🧻', '🧼', '🧽', '🐶', '🐱', '👶', '🛒',
+]
 
 export default function EditItemModal({
   isOpen,
   item,
+  customIcon = null,
   onClose,
   onSave,
+  onSaveIcon,
 }: EditItemModalProps) {
   const [name, setName] = useState('')
   const [category, setCategory] = useState<ShoppingCategory>('otros')
   const [quantity, setQuantity] = useState('')
   const [unit, setUnit] = useState('')
+  const [icon, setIcon] = useState('')
+  const [showIconPicker, setShowIconPicker] = useState(false)
   const [saving, setSaving] = useState(false)
 
   const QUICK_UNITS = ['ud', 'kg', 'g', 'l', 'lata', 'bote', 'pack']
@@ -59,10 +73,15 @@ export default function EditItemModal({
       setCategory((item.category as ShoppingCategory) || 'otros')
       setQuantity(item.quantity != null ? String(item.quantity) : '')
       setUnit(item.unit || '')
+      setIcon(customIcon || '')
+      setShowIconPicker(false)
     }
-  }, [isOpen, item])
+  }, [isOpen, item, customIcon])
 
   if (!isOpen || !item) return null
+
+  const autoIcon = getIngredientEmoji(name || item.name, category)
+  const previewIcon = icon.trim() || autoIcon
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -78,6 +97,10 @@ export default function EditItemModal({
         quantity: qtyNum !== null && !isNaN(qtyNum) ? qtyNum : null,
         unit: unit.trim() || null,
       })
+      const nextIcon = icon.trim() || null
+      if (onSaveIcon && (nextIcon !== (customIcon || null) || (nextIcon && cleanName !== item.name))) {
+        await onSaveIcon(cleanName, nextIcon)
+      }
       onClose()
     } finally {
       setSaving(false)
@@ -129,26 +152,134 @@ export default function EditItemModal({
               htmlFor="edit-item-name"
               style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.3rem' }}
             >
-              Nombre
+              Nombre e icono
             </label>
-            <input
-              id="edit-item-name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                boxSizing: 'border-box',
-                padding: '0.75rem 0.85rem',
-                fontSize: '0.92rem',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--border-default)',
-                background: 'var(--bg-base)',
-                color: 'var(--text-primary)',
-                outline: 'none',
-              }}
-            />
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={() => setShowIconPicker((prev) => !prev)}
+                aria-label="Cambiar icono del producto"
+                aria-expanded={showIconPicker}
+                title="Cambiar icono (guardado permanente)"
+                style={{
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: 'var(--radius-md)',
+                  border: showIconPicker || icon.trim() ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-default)',
+                  background: icon.trim() ? 'var(--accent-glow)' : 'var(--bg-base)',
+                  fontSize: '1.35rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                }}
+              >
+                {previewIcon.startsWith('/') ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={previewIcon} alt="" style={{ width: '1.25rem', height: '1.25rem', objectFit: 'contain' }} />
+                ) : (
+                  previewIcon
+                )}
+              </button>
+              <input
+                id="edit-item-name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  boxSizing: 'border-box',
+                  padding: '0.75rem 0.85rem',
+                  fontSize: '0.92rem',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-default)',
+                  background: 'var(--bg-base)',
+                  color: 'var(--text-primary)',
+                  outline: 'none',
+                }}
+              />
+            </div>
+
+            {showIconPicker && (
+              <div
+                style={{
+                  marginTop: '0.5rem',
+                  padding: '0.65rem',
+                  borderRadius: 'var(--radius-md)',
+                  background: 'var(--bg-base)',
+                  border: '1px solid var(--border-default)',
+                }}
+              >
+                <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.5rem' }}>
+                  <input
+                    type="text"
+                    value={icon}
+                    onChange={(e) => setIcon(e.target.value)}
+                    placeholder="Escribe o pega cualquier emoji..."
+                    aria-label="Icono personalizado"
+                    maxLength={8}
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      padding: '0.45rem 0.65rem',
+                      fontSize: '0.85rem',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border-default)',
+                      background: 'var(--bg-surface)',
+                      color: 'var(--text-primary)',
+                      outline: 'none',
+                    }}
+                  />
+                  {icon.trim() && (
+                    <button
+                      type="button"
+                      onClick={() => setIcon('')}
+                      style={{
+                        padding: '0.45rem 0.65rem',
+                        fontSize: '0.76rem',
+                        fontWeight: 600,
+                        borderRadius: 'var(--radius-sm)',
+                        border: '1px solid var(--border-default)',
+                        background: 'transparent',
+                        color: 'var(--text-muted)',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Auto
+                    </button>
+                  )}
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+                  {QUICK_ICONS.map((em) => (
+                    <button
+                      key={em}
+                      type="button"
+                      onClick={() => {
+                        setIcon(em)
+                        setShowIconPicker(false)
+                      }}
+                      style={{
+                        width: '34px',
+                        height: '34px',
+                        borderRadius: 'var(--radius-sm)',
+                        border: icon === em ? '1.5px solid var(--accent-primary)' : '1px solid transparent',
+                        background: icon === em ? 'var(--accent-glow)' : 'var(--bg-glass)',
+                        fontSize: '1.1rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {em}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div>
