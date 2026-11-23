@@ -87,8 +87,31 @@ export async function pairHouseholdWithCode(code: string): Promise<{ ok: boolean
   }
 }
 
+// Sequential queue for remote mutations so rapid deletes/toggles/adds never race
+let mutationQueue: Promise<void> = Promise.resolve()
+let localMutationEpoch = 0
+const recentlyDeletedRemoteIds = new Set<string>()
+
+export function markLocalMutation(): void {
+  localMutationEpoch++
+}
+
+function enqueueRemoteTask<T>(fn: () => Promise<T>): Promise<T> {
+  localMutationEpoch++
+  const run = mutationQueue.then(fn)
+  mutationQueue = run.then(
+    () => undefined,
+    () => undefined
+  )
+  return run
+}
+
 export async function syncActiveListWithRemote(): Promise<{ ok: boolean; synced: boolean; error?: string }> {
   try {
+    // Wait for any in-flight local remote mutations (deletes, toggles, adds) before fetching
+    await mutationQueue
+    const startEpoch = localMutationEpoch
+
     const settings = await getMarketSettings()
     if (settings.sync_mode !== 'paired_household' || !settings.paired_token || !settings.active_list_id) {
       return { ok: true, synced: false }
@@ -113,11 +136,17 @@ export async function syncActiveListWithRemote(): Promise<{ ok: boolean; synced:
     const remote = json?.data
     if (!remote) return { ok: true, synced: false }
 
+    // If the user modified/deleted items while the GET request was in flight, abort applying stale snapshot
+    if (localMutationEpoch !== startEpoch) {
+      return { ok: true, synced: false }
+    }
+
     const localItems = (await getLocalItems(settings.active_list_id)) || []
     const localByRemoteId = new Map(localItems.map((i) => [i.remote_item_id, i]))
     const localByName = new Map(localItems.map((i) => [i.name.toLowerCase().trim(), i]))
 
     for (const remoteItem of remote.shopping_list_items || []) {
+      if (recentlyDeletedRemoteIds.has(remoteItem.id)) continue
       const match = localByRemoteId.get(remoteItem.id) || localByName.get(remoteItem.name.toLowerCase().trim())
       await saveLocalItem({
         id: match?.id,
@@ -142,99 +171,113 @@ export async function syncActiveListWithRemote(): Promise<{ ok: boolean; synced:
   }
 }
 
-// Background fire-and-forget remote update helpers (never block local UI)
-export async function remoteToggleItem(remoteItemId: string | undefined | null, isChecked: boolean): Promise<void> {
-  if (!remoteItemId) return
-  const settings = await getMarketSettings()
-  if (settings.sync_mode !== 'paired_household' || !settings.paired_token) return
+// Background serialized remote update helpers (never block local UI, never race)
+export function remoteToggleItem(remoteItemId: string | undefined | null, isChecked: boolean): Promise<void> {
+  if (!remoteItemId) return Promise.resolve()
+  return enqueueRemoteTask(async () => {
+    const settings = await getMarketSettings()
+    if (settings.sync_mode !== 'paired_household' || !settings.paired_token) return
 
-  try {
-    await fetch(`${RECIPE_VAULT_URL}/api/s/${settings.paired_token}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ item_id: remoteItemId, is_checked: isChecked }),
-    })
-  } catch {
-    // Graceful offline tolerance
-  }
+    try {
+      await fetch(`${RECIPE_VAULT_URL}/api/s/${settings.paired_token}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item_id: remoteItemId, is_checked: isChecked }),
+      })
+    } catch {
+      // Graceful offline tolerance
+    }
+  })
 }
 
-export async function remoteAddItem(
+export function remoteAddItem(
   item: { name: string; quantity: number | null; unit: string | null; category?: string }
 ): Promise<string | null> {
-  const settings = await getMarketSettings()
-  if (settings.sync_mode !== 'paired_household' || !settings.paired_token) return null
+  return enqueueRemoteTask(async () => {
+    const settings = await getMarketSettings()
+    if (settings.sync_mode !== 'paired_household' || !settings.paired_token) return null
 
-  try {
-    const res = await fetch(`${RECIPE_VAULT_URL}/api/s/${settings.paired_token}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: item.name,
-        quantity: item.quantity,
-        unit: item.unit,
-        category: item.category,
-      }),
-    })
-    if (res.ok) {
-      const json = await res.json().catch(() => ({}))
-      return json?.data?.id || null
+    try {
+      const res = await fetch(`${RECIPE_VAULT_URL}/api/s/${settings.paired_token}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: item.name,
+          quantity: item.quantity,
+          unit: item.unit,
+          category: item.category,
+        }),
+      })
+      if (res.ok) {
+        const json = await res.json().catch(() => ({}))
+        return json?.data?.id || null
+      }
+    } catch {
+      // Graceful offline tolerance
     }
-  } catch {
-    // Graceful offline tolerance
-  }
-  return null
+    return null
+  })
 }
 
-export async function remoteUpdateItem(
+export function remoteUpdateItem(
   remoteItemId: string | undefined | null,
   updates: { name?: string; category?: string; quantity?: number | null; unit?: string | null }
 ): Promise<void> {
-  if (!remoteItemId) return
-  const settings = await getMarketSettings()
-  if (settings.sync_mode !== 'paired_household' || !settings.paired_token) return
+  if (!remoteItemId) return Promise.resolve()
+  return enqueueRemoteTask(async () => {
+    const settings = await getMarketSettings()
+    if (settings.sync_mode !== 'paired_household' || !settings.paired_token) return
 
-  try {
-    await fetch(`${RECIPE_VAULT_URL}/api/s/${settings.paired_token}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        item_id: remoteItemId,
-        ...updates,
-      }),
-    })
-  } catch {
-    // Graceful offline tolerance
-  }
+    try {
+      await fetch(`${RECIPE_VAULT_URL}/api/s/${settings.paired_token}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          item_id: remoteItemId,
+          ...updates,
+        }),
+      })
+    } catch {
+      // Graceful offline tolerance
+    }
+  })
 }
 
-export async function remoteDeleteItem(remoteItemId: string | undefined | null): Promise<void> {
-  if (!remoteItemId) return
-  const settings = await getMarketSettings()
-  if (settings.sync_mode !== 'paired_household' || !settings.paired_token) return
+export function remoteDeleteItem(remoteItemId: string | undefined | null): Promise<void> {
+  if (!remoteItemId) return Promise.resolve()
+  recentlyDeletedRemoteIds.add(remoteItemId)
+  return enqueueRemoteTask(async () => {
+    const settings = await getMarketSettings()
+    if (settings.sync_mode !== 'paired_household' || !settings.paired_token) return
 
-  try {
-    await fetch(`${RECIPE_VAULT_URL}/api/s/${settings.paired_token}?item_id=${encodeURIComponent(remoteItemId)}`, {
-      method: 'DELETE',
-    })
-  } catch {
-    // Graceful offline tolerance
-  }
+    try {
+      const res = await fetch(`${RECIPE_VAULT_URL}/api/s/${settings.paired_token}?item_id=${encodeURIComponent(remoteItemId)}`, {
+        method: 'DELETE',
+      })
+      if (res.ok) {
+        recentlyDeletedRemoteIds.delete(remoteItemId)
+      }
+    } catch {
+      // Graceful offline tolerance
+    }
+  })
 }
 
-export async function remoteClearChecked(): Promise<void> {
-  const settings = await getMarketSettings()
-  if (settings.sync_mode !== 'paired_household' || !settings.paired_token) return
+export function remoteClearChecked(): Promise<void> {
+  return enqueueRemoteTask(async () => {
+    const settings = await getMarketSettings()
+    if (settings.sync_mode !== 'paired_household' || !settings.paired_token) return
 
-  try {
-    await fetch(`${RECIPE_VAULT_URL}/api/s/${settings.paired_token}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'clear_checked' }),
-    })
-  } catch {
-    // Graceful offline tolerance
-  }
+    try {
+      await fetch(`${RECIPE_VAULT_URL}/api/s/${settings.paired_token}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'clear_checked' }),
+      })
+    } catch {
+      // Graceful offline tolerance
+    }
+  })
 }
 
 export async function unpairHousehold(): Promise<void> {

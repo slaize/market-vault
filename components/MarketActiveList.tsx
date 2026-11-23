@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useTransition } from 'react'
+import { useState, useEffect, useCallback, useTransition, useRef } from 'react'
 import {
   getLocalLists,
   getLocalItems,
@@ -12,6 +12,7 @@ import {
   getMarketSettings,
   saveMarketSettings,
   updateLocalListName,
+  updateLocalItemRemoteId,
   getProductSuggestions,
   getFrequentProducts,
   saveCustomProductIcon,
@@ -27,6 +28,7 @@ import {
   remoteDeleteItem,
   remoteClearChecked,
   remoteUpdateItem,
+  markLocalMutation,
 } from '@/lib/market-sync'
 import {
   CATEGORY_ORDER,
@@ -91,6 +93,7 @@ export default function MarketActiveList() {
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [editingItem, setEditingItem] = useState<MarketItem | null>(null)
   const [customIcons, setCustomIcons] = useState<Record<string, string>>({})
+  const deletedLocalIdsRef = useRef<Set<string>>(new Set())
 
   const showToast = (msg: string) => {
     setToastMessage(msg)
@@ -124,7 +127,9 @@ export default function MarketActiveList() {
       if (settings.sync_mode === 'paired_household' && settings.paired_token) {
         syncActiveListWithRemote().then((res) => {
           if (res.synced) {
-            getLocalItems(current.id).then(setItems)
+            getLocalItems(current.id).then((fresh) => {
+              setItems(fresh.filter((i) => !deletedLocalIdsRef.current.has(i.id)))
+            })
           }
         })
       }
@@ -316,6 +321,7 @@ export default function MarketActiveList() {
       unit: input.unit ?? null,
       category: input.category,
     })
+    deletedLocalIdsRef.current.delete(saved.id)
     setItems((prev) => [...prev, saved])
     showToast(`«${saved.name}» añadido`)
     getFrequentProducts(8).then(setFrequentProducts)
@@ -325,6 +331,17 @@ export default function MarketActiveList() {
         name: saved.name,
         quantity: saved.quantity,
         unit: saved.unit,
+        category: saved.category,
+      }).then((remoteId) => {
+        if (!remoteId) return
+        if (deletedLocalIdsRef.current.has(saved.id)) {
+          remoteDeleteItem(remoteId)
+        } else {
+          updateLocalItemRemoteId(saved.id, remoteId).catch(() => {})
+          setItems((prev) =>
+            prev.map((i) => (i.id === saved.id ? { ...i, remote_item_id: remoteId } : i))
+          )
+        }
       })
     }
   }
@@ -385,6 +402,8 @@ export default function MarketActiveList() {
 
   const handleDelete = async (item: MarketItem, e: React.MouseEvent) => {
     e.stopPropagation()
+    deletedLocalIdsRef.current.add(item.id)
+    markLocalMutation()
     triggerHaptic([20, 50, 20])
     setUndoItem({ item, action: 'deleted' })
     setTimeout(() => {
@@ -394,7 +413,7 @@ export default function MarketActiveList() {
     setItems((prev) => prev.filter((i) => i.id !== item.id))
     await deleteLocalItem(item.id)
 
-    if (item.remote_item_id) {
+    if (item.remote_item_id && isPaired && pairedToken && activeList?.remote_list_id) {
       remoteDeleteItem(item.remote_item_id)
     }
   }
@@ -460,6 +479,7 @@ export default function MarketActiveList() {
       }
       showToast('Deshecho: producto desmarcado')
     } else if (action === 'deleted') {
+      deletedLocalIdsRef.current.delete(item.id)
       const restored = await saveLocalItem({
         id: item.id,
         list_id: item.list_id,
@@ -471,6 +491,21 @@ export default function MarketActiveList() {
         sort_order: item.sort_order,
       })
       setItems((prev) => [...prev, restored])
+      if (isPaired && pairedToken && activeList.remote_list_id) {
+        remoteAddItem({
+          name: restored.name,
+          quantity: restored.quantity,
+          unit: restored.unit,
+          category: restored.category,
+        }).then((remoteId) => {
+          if (remoteId) {
+            updateLocalItemRemoteId(restored.id, remoteId).catch(() => {})
+            setItems((prev) =>
+              prev.map((i) => (i.id === restored.id ? { ...i, remote_item_id: remoteId } : i))
+            )
+          }
+        })
+      }
       showToast('Deshecho: producto restaurado')
     }
   }

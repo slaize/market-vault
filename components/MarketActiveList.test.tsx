@@ -278,4 +278,64 @@ describe('MarketActiveList Component', () => {
       )
     })
   })
+
+  it('deletes multiple items rapidly without regenerating any of them', async () => {
+    vi.mocked(marketDb.getLocalItems).mockResolvedValue([
+      {
+        id: 'item-a',
+        list_id: 'list-1',
+        name: 'Tomates',
+        quantity: 1,
+        unit: 'kg',
+        category: 'frutas-verduras',
+        is_checked: false,
+        sort_order: 1,
+        updated_at: new Date().toISOString(),
+      },
+      {
+        id: 'item-b',
+        list_id: 'list-1',
+        name: 'Cebollas',
+        quantity: 2,
+        unit: null,
+        category: 'frutas-verduras',
+        is_checked: false,
+        sort_order: 2,
+        updated_at: new Date().toISOString(),
+      },
+      {
+        id: 'item-c',
+        list_id: 'list-1',
+        name: 'Ajos',
+        quantity: 1,
+        unit: null,
+        category: 'frutas-verduras',
+        is_checked: false,
+        sort_order: 3,
+        updated_at: new Date().toISOString(),
+      },
+    ])
+    vi.mocked(marketDb.deleteLocalItem).mockResolvedValue(undefined)
+
+    render(<MarketActiveList />)
+    await waitFor(() => {
+      expect(screen.getByText('Tomates')).toBeInTheDocument()
+      expect(screen.getByText('Cebollas')).toBeInTheDocument()
+      expect(screen.getByText('Ajos')).toBeInTheDocument()
+    })
+
+    // Rapidly delete all 3 items back-to-back
+    fireEvent.click(screen.getByRole('button', { name: /Eliminar Tomates/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Eliminar Cebollas/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Eliminar Ajos/i }))
+
+    await waitFor(() => {
+      expect(screen.queryByText('Tomates')).not.toBeInTheDocument()
+      expect(screen.queryByText('Cebollas')).not.toBeInTheDocument()
+      expect(screen.queryByText('Ajos')).not.toBeInTheDocument()
+      expect(marketDb.deleteLocalItem).toHaveBeenCalledWith('item-a')
+      expect(marketDb.deleteLocalItem).toHaveBeenCalledWith('item-b')
+      expect(marketDb.deleteLocalItem).toHaveBeenCalledWith('item-c')
+    })
+  })
 })
