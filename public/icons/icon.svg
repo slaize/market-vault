@@ -1,61 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="bgEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#10B981" />
-      <stop offset="45%" stop-color="#059669" />
-      <stop offset="100%" stop-color="#044E3B" />
-    </linearGradient>
-    <radialGradient id="lightGlow" cx="25%" cy="20%" r="70%">
-      <stop offset="0%" stop-color="#34D399" stop-opacity="0.3" />
-      <stop offset="100%" stop-color="#044E3B" stop-opacity="0" />
+    <radialGradient id="bg4b" cx="50%" cy="18%" r="75%">
+      <stop offset="0%" stop-color="#24221F" />
+      <stop offset="100%" stop-color="#141311" />
     </radialGradient>
-    <filter id="mainShadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="16" stdDeviation="14" flood-color="#022c22" flood-opacity="0.55" />
+    <linearGradient id="basket4b" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#EFE9DE" />
+      <stop offset="100%" stop-color="#D9CEBC" />
+    </linearGradient>
+    <filter id="shadow4b" x="-15%" y="-15%" width="130%" height="140%">
+      <feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#000000" flood-opacity="0.5" />
     </filter>
-    <linearGradient id="burgundyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#9E1840" />
-      <stop offset="100%" stop-color="#5B0E24" />
-    </linearGradient>
-    <linearGradient id="goldBread" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FCD34D" />
-      <stop offset="100%" stop-color="#D97706" />
-    </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="124" fill="url(#bgEmerald)" />
-  <rect width="512" height="512" rx="124" fill="url(#lightGlow)" />
-  <rect x="5" y="5" width="502" height="502" rx="120" fill="none" stroke="rgba(255, 255, 255, 0.25)" stroke-width="3" />
 
-  <g filter="url(#mainShadow)">
-    <!-- Groceries coming out of bag -->
-    <path d="M190 190 C 170 120, 130 110, 115 125 C 130 155, 165 180, 190 190 Z" fill="#6EE7B7" />
-    <path d="M210 180 C 205 105, 235 85, 255 95 C 250 130, 230 165, 210 180 Z" fill="#34D399" />
+  <!-- Background: Warm Charcoal matching the app dark theme -->
+  <rect width="512" height="512" fill="url(#bg4b)" />
 
-    <!-- Baguette -->
-    <rect x="295" y="90" width="52" height="130" rx="26" transform="rotate(25 321 155)" fill="url(#goldBread)" stroke="#B45309" stroke-width="3" />
-    <line x1="318" y1="120" x2="332" y2="135" stroke="#92400E" stroke-width="4.5" stroke-linecap="round" />
-    <line x1="332" y1="150" x2="346" y2="165" stroke="#92400E" stroke-width="4.5" stroke-linecap="round" />
+  <g filter="url(#shadow4b)">
+    <!-- Handle -->
+    <path d="M170 232 C170 128, 342 128, 342 232" fill="none" stroke="#C89B6E" stroke-width="22" stroke-linecap="round" />
 
-    <!-- Carrot top / greens -->
-    <path d="M375 140 C 400 125, 410 140, 395 160 Z" fill="#34D399" />
-    <path d="M365 155 L 390 185" stroke="#F97316" stroke-width="16" stroke-linecap="round" />
+    <!-- Single crisp sage leaf peeking cleanly -->
+    <path d="M188 228 C176 166, 224 142, 260 172 C250 202, 222 224, 188 228 Z" fill="#4CC38A" />
+    <path d="M276 226 C284 182, 322 170, 344 194 C332 214, 306 224, 276 226 Z" fill="#2E7D5B" />
 
-    <!-- The Paper Bag (Warm Kraft Tone with folded top) -->
-    <path d="M145 200 L 367 200 L 350 410 L 162 410 Z" fill="#FDE68A" stroke="#D97706" stroke-width="4" />
-    <!-- Bag Fold / Shadow line -->
-    <path d="M145 200 L 162 410 L 256 410 L 256 200 Z" fill="#F59E0B" opacity="0.25" />
-    <!-- Top serrated / folded edge -->
-    <path d="M145 200 L 165 220 L 195 205 L 225 220 L 256 205 L 285 220 L 315 205 L 345 220 L 367 200" fill="none" stroke="#D97706" stroke-width="5" stroke-linejoin="round" />
+    <!-- Basket Body -->
+    <path d="M114 236 H398 L370 384 C366 404, 349 418, 329 418 H183 C163 418, 146 404, 142 384 Z" fill="url(#basket4b)" />
+    <path d="M116 246 H396 L393 260 H119 Z" fill="#B5A894" opacity="0.32" />
 
-    <!-- Hanging Burgundy Recipe Tag (The Wink) -->
-    <!-- Cord -->
-    <path d="M225 210 Q 235 250 250 265" fill="none" stroke="#FAF6EE" stroke-width="3.5" stroke-dasharray="6,4" />
-    <!-- Tag Rectangle -->
-    <rect x="220" y="260" width="84" height="104" rx="14" transform="rotate(-8 262 312)" fill="url(#burgundyGrad)" stroke="#FAF6EE" stroke-width="3" />
-    <circle cx="262" cy="274" r="5" fill="#FAF6EE" />
-    <!-- Crossed Fork & Spoon silhouette in warm cream -->
-    <!-- Spoon -->
-    <path d="M246 325 L 270 295 C 275 289, 281 292, 280 298 C 278 303, 270 307, 260 333 Z" fill="#FAF6EE" />
-    <!-- Fork -->
-    <path d="M275 325 L 250 295 M 245 292 L 249 297 M 253 290 L 256 295" stroke="#FAF6EE" stroke-width="3" stroke-linecap="round" />
+    <!-- Top Rim -->
+    <rect x="100" y="218" width="312" height="30" rx="15" fill="#FAF6EE" />
+    <circle cx="170" cy="233" r="6.5" fill="#C89B6E" />
+    <circle cx="342" cy="233" r="6.5" fill="#C89B6E" />
+
+    <!-- Market Sage Checkmark Seal centered on basket -->
+    <circle cx="256" cy="332" r="44" fill="#2E7D5B" />
+    <path d="M236 333 L250 347 L278 317" fill="none" stroke="#FAF6EE" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" />
   </g>
 </svg>
