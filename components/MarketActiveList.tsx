@@ -348,14 +348,13 @@ export default function MarketActiveList() {
 
   const handleAddProductDirectly = async (
     name: string,
-    category?: ShoppingCategory,
-    unit?: string | null
+    category?: ShoppingCategory
   ) => {
     await addOrReuseItem({
       name,
       category,
-      unit,
-      quantity: unit ? 1 : null,
+      unit: null,
+      quantity: null,
     })
   }
 
@@ -834,17 +833,12 @@ export default function MarketActiveList() {
                       >
                         {sug.name}
                       </span>
-                      {sug.default_unit && (
-                        <span className="mono-num" style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                          {sug.default_unit}
-                        </span>
-                      )}
                     </div>
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation()
-                        handleAddProductDirectly(sug.name, sug.category, sug.default_unit)
+                        handleAddProductDirectly(sug.name, sug.category)
                         setNewItemName('')
                         setShowSuggestions(false)
                       }}
@@ -919,7 +913,7 @@ export default function MarketActiveList() {
                 <button
                   key={p.name_normalized}
                   type="button"
-                  onClick={() => handleAddProductDirectly(p.name, p.category, p.default_unit)}
+                  onClick={() => handleAddProductDirectly(p.name, p.category)}
                   className="btn btn-ghost"
                   style={{
                     flexShrink: 0,

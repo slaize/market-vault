@@ -136,6 +136,8 @@ describe('MarketActiveList Component', () => {
         expect.objectContaining({
           list_id: 'list-1',
           name: 'Huevos camperos',
+          quantity: null,
+          unit: null,
         })
       )
     })
