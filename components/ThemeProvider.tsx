@@ -5,10 +5,10 @@ import { createContext, useContext, useEffect, useState, useTransition } from 'r
 export type Theme = 'light' | 'dark' | 'halloween' | 'navidad'
 
 export const THEME_HEX_MAP: Record<Theme, string> = {
-  light: '#FAF6EE',
-  dark: '#0F172A',
-  halloween: '#23152C',
-  navidad: '#0F2219',
+  light: '#F7F4EE',
+  dark: '#161513',
+  halloween: '#1D1721',
+  navidad: '#141F19',
 }
 
 export const THEME_ICON_MAP: Record<Theme, string> = {

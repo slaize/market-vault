@@ -546,8 +546,8 @@ export default function MarketActiveList() {
   const isAllDone = total > 0 && pendingItems.length === 0
 
   const getProgressMessage = () => {
-    if (total === 0) return 'Lista vacía · Añade lo que necesites ✨'
-    if (isAllDone) return '¡Todo listo! Compra completada 🎉'
+    if (total === 0) return 'Lista vacía'
+    if (isAllDone) return 'Compra completada'
     if (completed === 0) {
       return total === 1 ? '1 producto pendiente' : `${total} productos pendientes`
     }
@@ -563,7 +563,7 @@ export default function MarketActiveList() {
   })).filter((g) => g.items.length > 0)
 
   return (
-    <div style={{ maxWidth: '640px', margin: '0 auto', padding: '0.75rem 1rem 3.5rem' }}>
+    <div style={{ maxWidth: '640px', margin: '0 auto', padding: '0 20px 64px' }}>
       {/* Sticky Top Header */}
       <header
         style={{
@@ -571,23 +571,26 @@ export default function MarketActiveList() {
           top: 0,
           zIndex: 40,
           background: 'var(--bg-header)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
           borderBottom: '1px solid var(--border-subtle)',
-          paddingTop: 'max(0.85rem, env(safe-area-inset-top))',
-          paddingBottom: '0.65rem',
-          paddingLeft: 'max(1rem, env(safe-area-inset-left))',
-          paddingRight: 'max(1rem, env(safe-area-inset-right))',
-          marginBottom: '1rem',
+          paddingTop: 'max(16px, env(safe-area-inset-top))',
+          paddingBottom: '12px',
+          marginLeft: '-20px',
+          marginRight: '-20px',
+          paddingLeft: 'max(20px, env(safe-area-inset-left))',
+          paddingRight: 'max(20px, env(safe-area-inset-right))',
+          marginBottom: '20px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <h1
                 style={{
-                  fontSize: '1.25rem',
-                  fontWeight: 700,
+                  fontSize: '20px',
+                  lineHeight: '26px',
+                  fontWeight: 500,
                   color: 'var(--text-primary)',
                   margin: 0,
                   whiteSpace: 'nowrap',
@@ -607,10 +610,9 @@ export default function MarketActiveList() {
                     display: 'inline-flex',
                     alignItems: 'center',
                     flexShrink: 0,
-                    opacity: 0.9,
                   }}
                 >
-                  <UiIcon name="link" size="0.95em" />
+                  <UiIcon name="link" size={16} />
                 </span>
               )}
               <button
@@ -620,34 +622,47 @@ export default function MarketActiveList() {
                 style={{
                   width: '28px',
                   height: '28px',
+                  minHeight: '28px',
                   padding: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
                   color: 'var(--text-muted)',
-                  borderRadius: 'var(--radius-sm)',
+                  borderRadius: 'var(--radius-xs)',
                   flexShrink: 0,
                 }}
                 title="Editar nombre de la lista"
                 aria-label="Editar nombre de la lista"
               >
-                <UiIcon name="edit" size="0.9em" />
+                <UiIcon name="edit" size={15} />
               </button>
             </div>
-            <p
-              style={{
-                fontSize: '0.78rem',
-                color: isAllDone ? 'var(--accent-primary)' : 'var(--text-muted)',
-                fontWeight: isAllDone ? 600 : 400,
-                margin: '0.2rem 0 0',
-                transition: 'color 0.2s ease',
-              }}
-            >
-              {getProgressMessage()}
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+              <p
+                style={{
+                  fontSize: '13px',
+                  lineHeight: '18px',
+                  color: isAllDone ? 'var(--accent-primary)' : 'var(--text-muted)',
+                  fontWeight: isAllDone ? 500 : 400,
+                  margin: 0,
+                  transition: 'color 150ms var(--ease-out)',
+                }}
+              >
+                {getProgressMessage()}
+              </p>
+              {total > 0 && (
+                <span
+                  className="mono-num"
+                  style={{
+                    fontSize: '12px',
+                    lineHeight: '16px',
+                    color: 'var(--text-muted)',
+                  }}
+                >
+                  {completed}/{total}
+                </span>
+              )}
+            </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
             {/* Sync Button */}
             {isPaired && (
               <button
@@ -658,12 +673,10 @@ export default function MarketActiveList() {
                 style={{
                   width: '36px',
                   height: '36px',
+                  minHeight: '36px',
                   padding: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
                   borderRadius: 'var(--radius-sm)',
-                  color: 'var(--accent-primary)',
+                  color: 'var(--text-secondary)',
                 }}
                 title="Sincronizar con RecipeVault"
                 aria-label="Sincronizar con RecipeVault"
@@ -674,10 +687,10 @@ export default function MarketActiveList() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     transform: isSyncing ? 'rotate(360deg)' : 'none',
-                    transition: isSyncing ? 'transform 0.6s linear' : 'none',
+                    transition: isSyncing ? 'transform 600ms linear' : 'none',
                   }}
                 >
-                  <UiIcon name="refresh" size="1.15em" />
+                  <UiIcon name="refresh" size={18} />
                 </span>
               </button>
             )}
@@ -690,17 +703,15 @@ export default function MarketActiveList() {
               style={{
                 width: '36px',
                 height: '36px',
+                minHeight: '36px',
                 padding: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
                 borderRadius: 'var(--radius-sm)',
                 color: 'var(--text-secondary)',
               }}
               title="Compartir lista"
               aria-label="Compartir lista"
             >
-              <UiIcon name="share" size="1.15em" />
+              <UiIcon name="share" size={18} />
             </button>
           </div>
         </div>
@@ -709,10 +720,10 @@ export default function MarketActiveList() {
         {total > 0 && (
           <div
             style={{
-              height: '3px',
+              height: '2px',
               background: 'var(--border-subtle)',
-              borderRadius: '999px',
-              marginTop: '0.65rem',
+              borderRadius: '2px',
+              marginTop: '12px',
               overflow: 'hidden',
             }}
           >
@@ -720,11 +731,9 @@ export default function MarketActiveList() {
               style={{
                 height: '100%',
                 width: `${progressPct}%`,
-                background: isAllDone
-                  ? 'var(--accent-primary)'
-                  : 'linear-gradient(90deg, var(--accent-primary) 0%, var(--accent-hover) 100%)',
-                borderRadius: '999px',
-                transition: 'width 0.25s ease',
+                background: 'var(--accent-primary)',
+                borderRadius: '2px',
+                transition: 'width 240ms var(--ease-out)',
               }}
             />
           </div>
@@ -737,8 +746,8 @@ export default function MarketActiveList() {
         style={{
           position: 'relative',
           display: 'flex',
-          gap: '0.5rem',
-          marginBottom: frequentProducts.length > 0 ? '0.65rem' : '1.25rem',
+          gap: '8px',
+          marginBottom: frequentProducts.length > 0 ? '16px' : '24px',
         }}
       >
         <div style={{ position: 'relative', flex: 1 }}>
@@ -749,15 +758,17 @@ export default function MarketActiveList() {
             onFocus={() => {
               if (suggestions.length > 0) setShowSuggestions(true)
             }}
-            placeholder="Añadir producto... (ej: Plátanos 1kg)"
+            placeholder="Añadir producto"
+            aria-label="Añadir producto"
             style={{
               width: '100%',
-              padding: '0.75rem 0.95rem',
-              borderRadius: 'var(--radius-md)',
+              height: '44px',
+              padding: '0 12px',
+              borderRadius: 'var(--radius-sm)',
               background: 'var(--input-bg)',
               border: '1px solid var(--border-default)',
               color: 'var(--text-primary)',
-              fontSize: '1rem',
+              fontSize: '15px',
               outline: 'none',
             }}
           />
@@ -772,10 +783,10 @@ export default function MarketActiveList() {
                 left: 0,
                 right: 0,
                 zIndex: 60,
-                background: 'var(--bg-surface)',
+                background: 'var(--bg-elevated)',
                 border: '1px solid var(--border-default)',
                 borderRadius: 'var(--radius-md)',
-                boxShadow: '0 12px 28px rgba(0, 0, 0, 0.45), 0 4px 10px rgba(0, 0, 0, 0.25)',
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
                 overflow: 'hidden',
                 maxHeight: '260px',
                 overflowY: 'auto',
@@ -794,10 +805,11 @@ export default function MarketActiveList() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      padding: '0.65rem 0.85rem',
+                      minHeight: '44px',
+                      padding: '8px 12px',
                       borderBottom: '1px solid var(--border-subtle)',
                       cursor: 'pointer',
-                      transition: 'background 0.12s ease',
+                      transition: 'background-color 150ms var(--ease-out)',
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.background = 'var(--bg-glass-hover)'
@@ -806,13 +818,14 @@ export default function MarketActiveList() {
                       e.currentTarget.style.background = 'transparent'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', minWidth: 0, flex: 1 }}>
-                      <span style={{ fontSize: '1.1rem', flexShrink: 0, display: 'inline-flex', alignItems: 'center' }}>
-                        {renderIngredientIcon(emoji, '1.2rem')}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
+                      <span style={{ width: '24px', fontSize: '16px', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {renderIngredientIcon(emoji, '18px')}
                       </span>
-                      <strong
+                      <span
                         style={{
-                          fontSize: '0.9rem',
+                          fontSize: '14px',
+                          fontWeight: 500,
                           color: 'var(--text-primary)',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
@@ -820,10 +833,10 @@ export default function MarketActiveList() {
                         }}
                       >
                         {sug.name}
-                      </strong>
+                      </span>
                       {sug.default_unit && (
-                        <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                          ({sug.default_unit})
+                        <span className="mono-num" style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                          {sug.default_unit}
                         </span>
                       )}
                     </div>
@@ -835,20 +848,19 @@ export default function MarketActiveList() {
                         setNewItemName('')
                         setShowSuggestions(false)
                       }}
-                      className="btn btn-ghost"
+                      className="btn btn-secondary"
                       style={{
-                        fontSize: '0.75rem',
-                        padding: '0.2rem 0.6rem',
-                        borderRadius: '999px',
-                        background: 'var(--accent-glow)',
-                        color: 'var(--accent-primary)',
-                        fontWeight: 700,
+                        fontSize: '12px',
+                        padding: '0 10px',
+                        borderRadius: 'var(--radius-xs)',
+                        fontWeight: 500,
                         minHeight: '28px',
-                        marginLeft: '0.5rem',
+                        height: '28px',
+                        marginLeft: '8px',
                       }}
                       title={`Añadir ${sug.name}`}
                     >
-                      + Añadir
+                      Añadir
                     </button>
                   </div>
                 )
@@ -861,45 +873,40 @@ export default function MarketActiveList() {
           type="submit"
           className="btn btn-primary"
           style={{
-            padding: '0.75rem 1.15rem',
-            borderRadius: 'var(--radius-md)',
-            fontWeight: 700,
-            fontSize: '0.9rem',
+            height: '44px',
+            padding: '0 16px',
+            borderRadius: 'var(--radius-sm)',
+            fontWeight: 500,
+            fontSize: '14px',
+            flexShrink: 0,
           }}
         >
-          + Añadir
+          <UiIcon name="plus" size={16} />
+          <span>Añadir</span>
         </button>
       </form>
 
       {/* Frequent products quick chips */}
       {frequentProducts.length > 0 && (
-        <div style={{ marginBottom: '1.25rem' }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '0.45rem',
-            }}
-          >
+        <div style={{ marginBottom: '24px' }}>
+          <div style={{ marginBottom: '8px' }}>
             <span
               style={{
-                fontSize: '0.72rem',
-                fontWeight: 700,
+                fontSize: '12px',
+                lineHeight: '16px',
+                fontWeight: 500,
                 color: 'var(--text-muted)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
               }}
             >
-              ⚡ Habituales
+              Habituales
             </span>
           </div>
           <div
             style={{
               display: 'flex',
-              gap: '0.45rem',
+              gap: '8px',
               overflowX: 'auto',
-              paddingBottom: '0.35rem',
+              paddingBottom: '4px',
               WebkitOverflowScrolling: 'touch',
               scrollbarWidth: 'none',
             }}
@@ -916,24 +923,25 @@ export default function MarketActiveList() {
                   className="btn btn-ghost"
                   style={{
                     flexShrink: 0,
-                    fontSize: '0.82rem',
-                    fontWeight: 600,
-                    padding: '0.35rem 0.75rem',
-                    borderRadius: '999px',
-                    background: isAlreadyPending ? 'var(--accent-glow)' : 'var(--bg-card)',
-                    border: isAlreadyPending ? '1px solid var(--accent-primary)' : '1px solid var(--border-default)',
-                    color: isAlreadyPending ? 'var(--accent-primary)' : 'var(--text-primary)',
-                    opacity: isAlreadyPending ? 0.85 : 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
+                    fontSize: '13px',
+                    fontWeight: isAlreadyPending ? 500 : 400,
+                    height: '36px',
+                    minHeight: '36px',
+                    padding: '0 12px',
+                    borderRadius: 'var(--radius-sm)',
+                    background: isAlreadyPending ? 'var(--bg-raised)' : 'var(--bg-card)',
+                    border: isAlreadyPending ? '1px solid var(--border-strong)' : '1px solid var(--border-subtle)',
+                    color: isAlreadyPending ? 'var(--text-primary)' : 'var(--text-secondary)',
+                    gap: '6px',
                     whiteSpace: 'nowrap',
                   }}
                   title={isAlreadyPending ? `${p.name} ya está en la lista` : `Añadir ${p.name}`}
                 >
-                  <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>
-                    {isAlreadyPending ? '✓' : '+'}
-                  </span>
+                  <UiIcon
+                    name={isAlreadyPending ? 'check' : 'plus'}
+                    size={14}
+                    style={{ color: isAlreadyPending ? 'var(--accent-primary)' : 'var(--text-muted)' }}
+                  />
                   <span>{p.name}</span>
                 </button>
               )
@@ -947,69 +955,97 @@ export default function MarketActiveList() {
         <div
           style={{
             textAlign: 'center',
-            padding: '3rem 1rem',
-            borderRadius: 'var(--radius-lg)',
+            padding: '48px 20px',
+            borderRadius: 'var(--radius-md)',
             background: 'var(--bg-card)',
-            border: '1px dashed var(--border-default)',
+            border: '1px solid var(--border-subtle)',
           }}
         >
-          <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.5rem' }}>🧺</span>
-          <p style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
+          <div style={{ color: 'var(--text-muted)', marginBottom: '12px', display: 'inline-flex' }}>
+            <UiIcon name="cart" size={24} />
+          </div>
+          <p style={{ fontWeight: 500, fontSize: '15px', marginBottom: '4px', color: 'var(--text-primary)' }}>
             Tu lista está vacía
           </p>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-            Añade productos arriba o comparte tu lista para empezar.
+          <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>
+            Añade productos arriba para empezar
           </p>
         </div>
       )}
 
-      {/* Celebration Card: All checked */}
+      {/* Completion State: All checked */}
       {isAllDone && (
         <div
           style={{
-            textAlign: 'center',
-            padding: '2.25rem 1.25rem',
-            borderRadius: 'var(--radius-lg)',
-            background: 'var(--accent-glow)',
-            border: '1px solid var(--accent-primary)',
-            marginBottom: '1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '16px',
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--bg-raised)',
+            border: '1px solid var(--border-default)',
+            marginBottom: '24px',
           }}
         >
-          <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.4rem' }}>🎉</span>
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--accent-primary)', marginBottom: '0.2rem' }}>
-            ¡Todo en el carro!
-          </h2>
-          <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-            Has marcado todos los productos de esta lista. ¡Buen provecho!
-          </p>
+          <span
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              background: 'var(--accent-subtle)',
+              color: 'var(--accent-primary)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <UiIcon name="check" size={18} />
+          </span>
+          <div>
+            <h2 style={{ fontSize: '15px', lineHeight: '20px', fontWeight: 500, color: 'var(--text-primary)', margin: 0 }}>
+              Compra completada
+            </h2>
+            <p style={{ fontSize: '13px', lineHeight: '18px', color: 'var(--text-muted)', margin: '2px 0 0' }}>
+              Todos los productos están marcados
+            </p>
+          </div>
         </div>
       )}
 
       {/* Pending Items Grouped by Aisle */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         {groupedPending.map((group) => (
           <section key={group.category}>
-            <h2
+            <div
               style={{
-                fontSize: '0.82rem',
-                fontWeight: 800,
-                textTransform: 'uppercase',
-                letterSpacing: '0.04em',
-                color: 'var(--accent-secondary)',
-                marginBottom: '0.45rem',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.4rem',
+                justifyContent: 'space-between',
+                marginBottom: '8px',
+                padding: '0 4px',
               }}
             >
-              <span>{group.emoji}</span>
-              <span>{group.label}</span>
-              <span style={{ opacity: 0.8, fontWeight: 600 }}>({group.items.length})</span>
-            </h2>
+              <h2
+                style={{
+                  fontSize: '13px',
+                  lineHeight: '18px',
+                  fontWeight: 500,
+                  color: 'var(--text-secondary)',
+                  margin: 0,
+                }}
+              >
+                {group.label}
+              </h2>
+              <span className="mono-num" style={{ fontSize: '12px', lineHeight: '16px', color: 'var(--text-muted)' }}>
+                {group.items.length}
+              </span>
+            </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {group.items.map((item) => {
                 const itemEmoji = getIngredientEmoji(item.name, group.category, customIcons)
+                const qtyText = [item.quantity ?? '', item.unit ?? ''].filter(Boolean).join(' ')
                 return (
                   <div
                     key={item.id}
@@ -1019,16 +1055,17 @@ export default function MarketActiveList() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      padding: '0.8rem 0.95rem',
+                      minHeight: '48px',
+                      padding: '8px 8px 8px 16px',
                       borderRadius: 'var(--radius-md)',
                       background: 'var(--bg-card)',
                       border: '1px solid var(--border-subtle)',
                       cursor: 'pointer',
                       userSelect: 'none',
-                      transition: 'background 0.12s ease',
+                      transition: 'background-color 150ms var(--ease-out), border-color 150ms var(--ease-out)',
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
                       <input
                         type="checkbox"
                         checked={item.is_checked}
@@ -1036,29 +1073,49 @@ export default function MarketActiveList() {
                         className="market-checkbox"
                         aria-label={`Marcar ${item.name}`}
                       />
-                      <span style={{ fontSize: '1.2rem', flexShrink: 0, display: 'inline-flex', alignItems: 'center' }}>
-                        {renderIngredientIcon(itemEmoji, '1.35rem')}
+                      <span
+                        style={{
+                          width: '24px',
+                          fontSize: '17px',
+                          flexShrink: 0,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        {renderIngredientIcon(itemEmoji, '20px')}
                       </span>
                       <span
                         style={{
-                          fontSize: '0.95rem',
-                          fontWeight: 500,
+                          fontSize: '15px',
+                          lineHeight: '20px',
+                          fontWeight: 400,
                           color: 'var(--text-primary)',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           whiteSpace: 'nowrap',
+                          flex: 1,
                         }}
                       >
                         {item.name}
                       </span>
-                      {(item.quantity || item.unit) && (
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', flexShrink: 0 }}>
-                          ({item.quantity ?? ''} {item.unit ?? ''})
+                      {qtyText && (
+                        <span
+                          className="mono-num"
+                          style={{
+                            fontSize: '12px',
+                            lineHeight: '16px',
+                            color: 'var(--text-muted)',
+                            flexShrink: 0,
+                            paddingLeft: '8px',
+                          }}
+                        >
+                          {qtyText}
                         </span>
                       )}
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.15rem', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '2px', flexShrink: 0, marginLeft: '4px' }}>
                       <button
                         type="button"
                         onClick={(e) => {
@@ -1067,30 +1124,32 @@ export default function MarketActiveList() {
                         }}
                         className="btn btn-ghost"
                         style={{
-                          minWidth: '38px',
-                          minHeight: '38px',
-                          padding: '0.35rem',
+                          width: '36px',
+                          height: '36px',
+                          minHeight: '36px',
+                          padding: 0,
                           color: 'var(--text-muted)',
                         }}
                         title="Editar"
                         aria-label={`Editar ${item.name}`}
                       >
-                        <UiIcon name="pencil" size="0.95em" />
+                        <UiIcon name="pencil" size={16} />
                       </button>
                       <button
                         type="button"
                         onClick={(e) => handleDelete(item, e)}
                         className="btn btn-ghost"
                         style={{
-                          minWidth: '38px',
-                          minHeight: '38px',
-                          padding: '0.35rem',
+                          width: '36px',
+                          height: '36px',
+                          minHeight: '36px',
+                          padding: 0,
                           color: 'var(--text-muted)',
                         }}
                         title="Eliminar"
                         aria-label={`Eliminar ${item.name}`}
                       >
-                        <UiIcon name="trash" size="0.95em" />
+                        <UiIcon name="trash" size={16} />
                       </button>
                     </div>
                   </div>
@@ -1103,8 +1162,8 @@ export default function MarketActiveList() {
 
       {/* Completed Accordion Section */}
       {checkedItems.length > 0 && (
-        <section style={{ marginTop: '2rem', borderTop: '1px solid var(--border-subtle)', paddingTop: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
+        <section style={{ marginTop: '32px', borderTop: '1px solid var(--border-subtle)', paddingTop: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
             <button
               type="button"
               onClick={() => setShowCheckedSection(!showCheckedSection)}
@@ -1112,17 +1171,28 @@ export default function MarketActiveList() {
                 background: 'none',
                 border: 'none',
                 color: 'var(--text-muted)',
-                fontSize: '0.82rem',
-                fontWeight: 700,
+                fontSize: '13px',
+                fontWeight: 500,
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.4rem',
+                gap: '6px',
                 cursor: 'pointer',
-                padding: '0.3rem 0',
+                padding: '4px 0',
               }}
             >
-              <span>{showCheckedSection ? '▼' : '▶'}</span>
-              <span>Comprados ({checkedItems.length})</span>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  transform: showCheckedSection ? 'rotate(0deg)' : 'rotate(-90deg)',
+                  transition: 'transform 150ms var(--ease-out)',
+                }}
+              >
+                <UiIcon name="chevDown" size={16} />
+              </span>
+              <span>Comprados</span>
+              <span className="mono-num" style={{ fontSize: '12px' }}>
+                {checkedItems.length}
+              </span>
             </button>
 
             <button
@@ -1132,10 +1202,10 @@ export default function MarketActiveList() {
                 background: 'none',
                 border: 'none',
                 color: 'var(--danger)',
-                fontSize: '0.78rem',
-                fontWeight: 600,
+                fontSize: '13px',
+                fontWeight: 500,
                 cursor: 'pointer',
-                padding: '0.3rem 0.5rem',
+                padding: '4px 8px',
               }}
             >
               Limpiar comprados
@@ -1143,7 +1213,7 @@ export default function MarketActiveList() {
           </div>
 
           {showCheckedSection && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {checkedItems.map((item) => {
                 const itemEmoji = getIngredientEmoji(item.name, item.category, customIcons)
                 return (
@@ -1154,15 +1224,16 @@ export default function MarketActiveList() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      padding: '0.7rem 0.9rem',
+                      minHeight: '44px',
+                      padding: '8px 8px 8px 16px',
                       borderRadius: 'var(--radius-md)',
-                      background: 'var(--bg-glass)',
-                      opacity: 0.65,
+                      background: 'transparent',
+                      opacity: 0.6,
                       cursor: 'pointer',
                       border: '1px solid var(--border-subtle)',
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'line-through', flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'line-through', flex: 1, minWidth: 0 }}>
                       <input
                         type="checkbox"
                         checked={item.is_checked}
@@ -1170,15 +1241,15 @@ export default function MarketActiveList() {
                         className="market-checkbox"
                         aria-label={`Desmarcar ${item.name}`}
                       />
-                      <span style={{ fontSize: '1.1rem', flexShrink: 0, opacity: 0.6, display: 'inline-flex', alignItems: 'center' }}>
-                        {renderIngredientIcon(itemEmoji, '1.25rem')}
+                      <span style={{ width: '24px', fontSize: '16px', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {renderIngredientIcon(itemEmoji, '18px')}
                       </span>
-                      <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <span style={{ fontSize: '14px', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {item.name}
                       </span>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.15rem', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '2px', flexShrink: 0 }}>
                       <button
                         type="button"
                         onClick={(e) => {
@@ -1186,21 +1257,21 @@ export default function MarketActiveList() {
                           setEditingItem(item)
                         }}
                         className="btn btn-ghost"
-                        style={{ minWidth: '36px', minHeight: '36px', padding: '0.3rem', color: 'var(--text-muted)' }}
+                        style={{ width: '36px', height: '36px', minHeight: '36px', padding: 0, color: 'var(--text-muted)' }}
                         title="Editar"
                         aria-label={`Editar ${item.name}`}
                       >
-                        <UiIcon name="pencil" size="0.9em" />
+                        <UiIcon name="pencil" size={16} />
                       </button>
                       <button
                         type="button"
                         onClick={(e) => handleDelete(item, e)}
                         className="btn btn-ghost"
-                        style={{ minWidth: '36px', minHeight: '36px', padding: '0.3rem', color: 'var(--text-muted)' }}
+                        style={{ width: '36px', height: '36px', minHeight: '36px', padding: 0, color: 'var(--text-muted)' }}
                         title="Eliminar"
                         aria-label={`Eliminar ${item.name}`}
                       >
-                        <UiIcon name="trash" size="0.9em" />
+                        <UiIcon name="trash" size={16} />
                       </button>
                     </div>
                   </div>
@@ -1218,38 +1289,38 @@ export default function MarketActiveList() {
           className="market-toast"
           style={{
             position: 'fixed',
-            bottom: '5.5rem',
+            bottom: '80px',
             left: '50%',
             transform: 'translateX(-50%)',
             zIndex: 60,
-            background: 'var(--bg-surface)',
-            border: '1.5px solid var(--accent-primary)',
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
-            borderRadius: '999px',
-            padding: '0.6rem 1rem',
+            background: 'var(--bg-elevated)',
+            border: '1px solid var(--border-default)',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.28)',
+            borderRadius: 'var(--radius-md)',
+            padding: '8px 8px 8px 16px',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.85rem',
+            gap: '12px',
             color: 'var(--text-primary)',
-            fontSize: '0.85rem',
+            fontSize: '13px',
             whiteSpace: 'nowrap',
           }}
         >
-          <span>
-            {undoItem.action === 'checked' ? '✓ Producto marcado' : '🗑️ Producto eliminado'}
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <UiIcon name={undoItem.action === 'checked' ? 'check' : 'trash'} size={15} style={{ color: 'var(--accent-primary)' }} />
+            <span>{undoItem.action === 'checked' ? 'Producto marcado' : 'Producto eliminado'}</span>
           </span>
           <button
             type="button"
             onClick={handleUndo}
+            className="btn btn-primary"
             style={{
-              background: 'var(--accent-primary)',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '999px',
-              padding: '0.25rem 0.75rem',
-              fontWeight: 700,
-              fontSize: '0.78rem',
-              cursor: 'pointer',
+              height: '32px',
+              minHeight: '32px',
+              borderRadius: 'var(--radius-xs)',
+              padding: '0 12px',
+              fontWeight: 500,
+              fontSize: '13px',
             }}
           >
             Deshacer
@@ -1264,18 +1335,18 @@ export default function MarketActiveList() {
           className="market-toast"
           style={{
             position: 'fixed',
-            bottom: '5.5rem',
+            bottom: '80px',
             left: '50%',
             transform: 'translateX(-50%)',
             zIndex: 60,
-            background: 'var(--bg-surface)',
+            background: 'var(--bg-elevated)',
             border: '1px solid var(--border-default)',
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
-            borderRadius: '999px',
-            padding: '0.6rem 1.15rem',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.24)',
+            borderRadius: 'var(--radius-md)',
+            padding: '10px 16px',
             color: 'var(--text-primary)',
-            fontSize: '0.84rem',
-            fontWeight: 600,
+            fontSize: '13px',
+            fontWeight: 500,
             whiteSpace: 'nowrap',
           }}
         >

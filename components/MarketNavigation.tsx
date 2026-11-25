@@ -8,8 +8,8 @@ export default function MarketNavigation() {
   const pathname = usePathname()
 
   const tabs = [
-    { href: '/', label: 'Mis Listas', icon: 'list' as const },
-    { href: '/compra', label: 'Mi Compra', icon: 'cart' as const },
+    { href: '/', label: 'Listas', icon: 'list' as const },
+    { href: '/compra', label: 'Compra', icon: 'cart' as const },
     { href: '/ajustes', label: 'Ajustes', icon: 'settings' as const },
   ]
 
@@ -23,13 +23,13 @@ export default function MarketNavigation() {
         right: 0,
         zIndex: 50,
         background: 'var(--bg-header)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         borderTop: '1px solid var(--border-subtle)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-around',
-        padding: '0.45rem 0.5rem max(0.45rem, env(safe-area-inset-bottom))',
+        padding: '8px 16px max(8px, env(safe-area-inset-bottom))',
       }}
     >
       {tabs.map((tab) => {
@@ -46,18 +46,27 @@ export default function MarketNavigation() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '0.2rem',
-              color: isActive ? 'var(--accent-primary)' : 'var(--text-muted)',
+              justifyContent: 'center',
+              gap: '4px',
+              minWidth: '72px',
+              minHeight: '44px',
+              color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
               textDecoration: 'none',
-              fontSize: '0.74rem',
-              fontWeight: isActive ? 700 : 500,
-              padding: '0.4rem 1.25rem',
-              borderRadius: 'var(--radius-md)',
-              background: isActive ? 'var(--accent-glow)' : 'transparent',
-              transition: 'all 0.15s ease',
+              fontSize: '12px',
+              lineHeight: '16px',
+              fontWeight: isActive ? 500 : 400,
+              padding: '4px 16px',
+              borderRadius: 'var(--radius-sm)',
+              background: isActive ? 'var(--bg-raised)' : 'transparent',
+              border: isActive ? '1px solid var(--border-subtle)' : '1px solid transparent',
+              transition: 'color 150ms var(--ease-out), background-color 150ms var(--ease-out), border-color 150ms var(--ease-out)',
             }}
           >
-            <UiIcon name={tab.icon} size="1.25em" />
+            <UiIcon
+              name={tab.icon}
+              size={18}
+              style={{ color: isActive ? 'var(--accent-primary)' : 'inherit' }}
+            />
             <span>{tab.label}</span>
           </Link>
         )

@@ -112,60 +112,54 @@ export default function ShareListModal({
           maxWidth: '540px',
           background: 'var(--bg-surface)',
           border: '1px solid var(--border-default)',
-          borderRadius: 'var(--radius-xl) var(--radius-xl) var(--radius-md) var(--radius-md)',
-          padding: '1.5rem',
-          boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.5)',
+          borderRadius: 'var(--radius-lg) var(--radius-lg) var(--radius-md) var(--radius-md)',
+          padding: '20px',
+          boxShadow: '0 -8px 24px rgba(0, 0, 0, 0.25)',
           color: 'var(--text-primary)',
         }}
       >
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <div>
-            <h2 id="share-modal-title" style={{ fontSize: '1.15rem', fontWeight: 800 }}>
-              📤 Compartir lista
+            <h2 id="share-modal-title" style={{ fontSize: '18px', lineHeight: '24px', fontWeight: 500 }}>
+              Compartir lista
             </h2>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
-              «{listName}» ({items.filter((i) => !i.is_checked).length} productos)
+            <p className="mono-num" style={{ fontSize: '12px', lineHeight: '16px', color: 'var(--text-muted)', marginTop: '4px' }}>
+              {listName} · {items.filter((i) => !i.is_checked).length} productos
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="btn btn-ghost"
-            style={{ width: '36px', height: '36px', padding: 0, borderRadius: '50%' }}
+            style={{ width: '36px', height: '36px', minHeight: '36px', padding: 0, borderRadius: 'var(--radius-sm)' }}
             aria-label="Cerrar modal"
           >
-            ✕
+            <UiIcon name="x" size={18} />
           </button>
         </div>
 
         {/* Options */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {/* WhatsApp */}
           <button
             type="button"
             onClick={handleWhatsApp}
+            className="btn btn-primary"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
+              justifyContent: 'flex-start',
+              gap: '12px',
               width: '100%',
-              padding: '0.85rem 1rem',
-              borderRadius: 'var(--radius-md)',
-              background: '#25D366',
-              color: '#ffffff',
-              border: 'none',
-              fontWeight: 700,
-              fontSize: '0.92rem',
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(37, 211, 102, 0.3)',
+              padding: '12px 16px',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: '14px',
             }}
           >
-            <span style={{ fontSize: '1.25rem' }}>💬</span>
+            <UiIcon name="share" size={18} />
             <div style={{ textAlign: 'left', flex: 1 }}>
-              <div>Enviar por WhatsApp</div>
-              <div style={{ fontSize: '0.74rem', opacity: 0.9, fontWeight: 500 }}>
-                Texto limpio y organizado por pasillos con emojis
+              <div style={{ fontWeight: 500 }}>Enviar por WhatsApp</div>
+              <div style={{ fontSize: '12px', opacity: 0.78, fontWeight: 400 }}>
+                Texto ordenado por pasillos
               </div>
             </div>
           </button>
@@ -174,26 +168,21 @@ export default function ShareListModal({
           <button
             type="button"
             onClick={handleNativeShare}
+            className="btn btn-secondary"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
+              justifyContent: 'flex-start',
+              gap: '12px',
               width: '100%',
-              padding: '0.85rem 1rem',
-              borderRadius: 'var(--radius-md)',
-              background: 'var(--bg-glass)',
-              border: '1px solid var(--border-default)',
-              color: 'var(--text-primary)',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
+              padding: '12px 16px',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: '14px',
             }}
           >
-            <span style={{ fontSize: '1.25rem' }}>📱</span>
+            <UiIcon name="share" size={18} style={{ color: 'var(--text-muted)' }} />
             <div style={{ textAlign: 'left', flex: 1 }}>
-              <div>Compartir con el móvil...</div>
-              <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                AirDrop, Telegram, Mensajes, Correo, Notas
+              <div style={{ fontWeight: 500 }}>Compartir con el móvil</div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 400 }}>
+                AirDrop, Telegram, Mensajes o Notas
               </div>
             </div>
           </button>
@@ -202,26 +191,21 @@ export default function ShareListModal({
           <button
             type="button"
             onClick={handleCopyText}
+            className="btn btn-secondary"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
+              justifyContent: 'flex-start',
+              gap: '12px',
               width: '100%',
-              padding: '0.85rem 1rem',
-              borderRadius: 'var(--radius-md)',
-              background: 'var(--bg-glass)',
-              border: '1px solid var(--border-default)',
-              color: 'var(--text-primary)',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
+              padding: '12px 16px',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: '14px',
             }}
           >
-            <span style={{ fontSize: '1.25rem' }}>📋</span>
+            <UiIcon name={copiedText ? 'check' : 'copy'} size={18} style={{ color: copiedText ? 'var(--accent-primary)' : 'var(--text-muted)' }} />
             <div style={{ textAlign: 'left', flex: 1 }}>
-              <div>{copiedText ? '✓ ¡Copiado!' : 'Copiar texto formateado'}</div>
-              <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                Para pegar en cualquier chat o bloc de notas
+              <div style={{ fontWeight: 500 }}>{copiedText ? 'Copiado' : 'Copiar texto formateado'}</div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 400 }}>
+                Para pegar en cualquier chat o nota
               </div>
             </div>
           </button>
@@ -231,26 +215,24 @@ export default function ShareListModal({
             <button
               type="button"
               onClick={handleCopyLiveLink}
+              className="btn btn-secondary"
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
+                justifyContent: 'flex-start',
+                gap: '12px',
                 width: '100%',
-                padding: '0.85rem 1rem',
-                borderRadius: 'var(--radius-md)',
-                background: 'var(--accent-glow)',
-                border: '1px solid var(--accent-primary)',
-                color: 'var(--accent-primary)',
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                cursor: 'pointer',
+                padding: '12px 16px',
+                borderRadius: 'var(--radius-sm)',
+                borderColor: 'var(--border-strong)',
+                fontSize: '14px',
               }}
             >
-              <span style={{ fontSize: '1.25rem' }}>🔗</span>
+              <UiIcon name={copiedLink ? 'check' : 'link'} size={18} style={{ color: 'var(--accent-primary)' }} />
               <div style={{ textAlign: 'left', flex: 1 }}>
-                <div>{copiedLink ? '✓ ¡Enlace interactivo copiado!' : 'Copiar enlace interactivo en vivo'}</div>
-                <div style={{ fontSize: '0.74rem', opacity: 0.85, fontWeight: 500 }}>
-                  Abre la lista interactiva para que tu acompañante tache en tiempo real
+                <div style={{ fontWeight: 500, color: 'var(--accent-primary)' }}>
+                  {copiedLink ? 'Enlace copiado' : 'Copiar enlace interactivo en vivo'}
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 400 }}>
+                  Permite tachar productos en tiempo real
                 </div>
               </div>
             </button>

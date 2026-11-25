@@ -66,19 +66,19 @@ export default function ConfirmModal({
           color: 'var(--text-primary)',
         }}
       >
-        <h2 id="confirm-modal-title" style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '0.4rem' }}>
+        <h2 id="confirm-modal-title" style={{ fontSize: '18px', lineHeight: '24px', fontWeight: 500, marginBottom: '8px' }}>
           {title}
         </h2>
-        <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '1.25rem', lineHeight: 1.5 }}>
+        <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '20px', lineHeight: '20px' }}>
           {message}
         </p>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.65rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
           <button
             type="button"
             onClick={onCancel}
-            className="btn btn-ghost"
-            style={{ padding: '0.6rem 1rem', fontSize: '0.85rem' }}
+            className="btn btn-secondary"
+            style={{ padding: '0 16px', minHeight: '40px', fontSize: '14px' }}
           >
             {cancelText}
           </button>
@@ -86,13 +86,14 @@ export default function ConfirmModal({
             type="button"
             onClick={onConfirm}
             style={{
-              padding: '0.6rem 1.25rem',
-              borderRadius: 'var(--radius-md)',
-              background: isDanger ? 'var(--danger)' : 'var(--accent-primary)',
-              color: '#ffffff',
+              padding: '0 16px',
+              minHeight: '40px',
+              borderRadius: 'var(--radius-sm)',
+              background: isDanger ? 'var(--danger)' : 'var(--btn-primary-bg)',
+              color: isDanger ? '#ffffff' : 'var(--btn-primary-text)',
               border: 'none',
-              fontWeight: 700,
-              fontSize: '0.85rem',
+              fontWeight: 500,
+              fontSize: '14px',
               cursor: 'pointer',
             }}
           >

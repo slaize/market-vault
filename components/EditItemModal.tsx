@@ -139,11 +139,11 @@ export default function EditItemModal({
           color: 'var(--text-primary)',
         }}
       >
-        <h2 id="edit-item-title" style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '0.35rem' }}>
-          ✏️ Editar producto
+        <h2 id="edit-item-title" style={{ fontSize: '18px', lineHeight: '24px', fontWeight: 500, marginBottom: '4px' }}>
+          Editar producto
         </h2>
-        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-          Modifica el nombre, categoría o cantidad del producto.
+        <p style={{ fontSize: '13px', lineHeight: '18px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+          Modifica el nombre, icono, categoría o cantidad
         </p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>

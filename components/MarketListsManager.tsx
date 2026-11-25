@@ -180,13 +180,30 @@ export default function MarketListsManager() {
   }
 
   return (
-    <div style={{ maxWidth: '640px', margin: '0 auto', padding: '1rem 1rem 3.5rem' }}>
-      <header style={{ marginBottom: '1.25rem' }}>
-        <h1 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-          📋 Mis Listas de Compra
+    <div
+      style={{
+        maxWidth: '640px',
+        margin: '0 auto',
+        paddingTop: 'max(24px, env(safe-area-inset-top))',
+        paddingBottom: '64px',
+        paddingLeft: '20px',
+        paddingRight: '20px',
+      }}
+    >
+      <header style={{ marginBottom: '20px' }}>
+        <h1
+          style={{
+            fontSize: '24px',
+            lineHeight: '28px',
+            fontWeight: 500,
+            color: 'var(--text-primary)',
+            letterSpacing: '-0.01em',
+          }}
+        >
+          Mis listas
         </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.2rem' }}>
-          Toca cualquier lista para entrar a comprar o gestiona listas independientes.
+        <p style={{ color: 'var(--text-muted)', fontSize: '14px', lineHeight: '20px', marginTop: '4px' }}>
+          Selecciona una lista para comprar o crea una nueva
         </p>
       </header>
 
@@ -195,15 +212,15 @@ export default function MarketListsManager() {
           role="status"
           className="market-banner"
           style={{
-            background: 'var(--accent-glow)',
-            border: '1px solid var(--accent-primary)',
-            borderRadius: 'var(--radius-md)',
-            color: 'var(--accent-primary)',
-            padding: '0.65rem 0.9rem',
-            fontSize: '0.82rem',
-            marginBottom: '1rem',
-            textAlign: 'center',
-            fontWeight: 600,
+            background: 'var(--bg-raised)',
+            border: '1px solid var(--border-default)',
+            borderRadius: 'var(--radius-sm)',
+            color: 'var(--text-primary)',
+            padding: '12px 16px',
+            fontSize: '13px',
+            lineHeight: '18px',
+            marginBottom: '16px',
+            fontWeight: 500,
           }}
         >
           {feedback}
@@ -211,20 +228,23 @@ export default function MarketListsManager() {
       )}
 
       {/* New List Form */}
-      <form onSubmit={handleCreateList} style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+      <form onSubmit={handleCreateList} style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
         <input
           type="text"
           value={newListName}
           onChange={(e) => setNewListName(e.target.value)}
-          placeholder="Nombre de la nueva lista... (ej: Farmacia)"
+          placeholder="Nueva lista"
+          aria-label="Nombre de la nueva lista"
           style={{
             flex: 1,
-            padding: '0.75rem 0.9rem',
-            borderRadius: 'var(--radius-md)',
+            minWidth: 0,
+            height: '44px',
+            padding: '0 12px',
+            borderRadius: 'var(--radius-sm)',
             background: 'var(--input-bg)',
             border: '1px solid var(--border-default)',
             color: 'var(--text-primary)',
-            fontSize: '1rem',
+            fontSize: '15px',
             outline: 'none',
           }}
         />
@@ -232,13 +252,16 @@ export default function MarketListsManager() {
           type="submit"
           className="btn btn-primary"
           style={{
-            padding: '0.75rem 1.25rem',
-            borderRadius: 'var(--radius-md)',
-            fontWeight: 700,
-            fontSize: '0.9rem',
+            height: '44px',
+            padding: '0 16px',
+            borderRadius: 'var(--radius-sm)',
+            fontWeight: 500,
+            fontSize: '14px',
+            flexShrink: 0,
           }}
         >
-          + Crear
+          <UiIcon name="plus" size={16} />
+          <span>Crear</span>
         </button>
       </form>
 
@@ -247,20 +270,24 @@ export default function MarketListsManager() {
         <div
           style={{
             textAlign: 'center',
-            padding: '3rem 1rem',
-            borderRadius: 'var(--radius-lg)',
+            padding: '48px 20px',
+            borderRadius: 'var(--radius-md)',
             background: 'var(--bg-card)',
-            border: '1px dashed var(--border-default)',
+            border: '1px solid var(--border-subtle)',
           }}
         >
-          <span style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.5rem' }}>📋</span>
-          <p style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
+          <div style={{ color: 'var(--text-muted)', marginBottom: '12px', display: 'inline-flex' }}>
+            <UiIcon name="list" size={24} />
+          </div>
+          <p style={{ fontWeight: 500, fontSize: '15px', marginBottom: '4px', color: 'var(--text-primary)' }}>
             No tienes ninguna lista
           </p>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Crea tu primera lista arriba para comenzar.</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>
+            Crea tu primera lista arriba para empezar
+          </p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {lists.map((list) => {
             const isActive = list.id === activeListId
             const isMenuOpen = openMenuId === list.id
@@ -295,72 +322,73 @@ export default function MarketListsManager() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '0.85rem 1rem',
+                  minHeight: '56px',
+                  padding: '12px 12px 12px 16px',
                   borderRadius: 'var(--radius-md)',
-                  background: isActive ? 'var(--accent-glow)' : 'var(--bg-card)',
+                  background: isActive ? 'var(--bg-raised)' : 'var(--bg-card)',
                   border: isActive
-                    ? '1.5px solid var(--accent-primary)'
+                    ? '1px solid var(--border-strong)'
                     : '1px solid var(--border-subtle)',
                   cursor: 'pointer',
-                  transition: 'background 0.15s ease, border-color 0.15s ease',
+                  transition: 'background-color 150ms var(--ease-out), border-color 150ms var(--ease-out)',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0, flex: 1, paddingRight: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1, paddingRight: '8px' }}>
                   <span
                     title={list.remote_list_id ? 'Vinculada con RecipeVault' : 'Lista local (no vinculada)'}
                     aria-label={list.remote_list_id ? 'Vinculada con RecipeVault' : 'Lista local'}
                     style={{
+                      width: '20px',
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: list.remote_list_id ? 'var(--accent-secondary)' : 'var(--text-muted)',
+                      color: list.remote_list_id ? 'var(--accent-primary)' : 'var(--text-muted)',
                       opacity: list.remote_list_id ? 1 : 0.45,
                       flexShrink: 0,
                     }}
                   >
-                    <UiIcon name={list.remote_list_id ? 'link' : 'unlink'} size="1.15em" />
+                    <UiIcon name={list.remote_list_id ? 'link' : 'unlink'} size={16} />
                   </span>
 
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.45rem', minWidth: 0, overflow: 'hidden' }}>
-                    <strong
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0, overflow: 'hidden' }}>
+                    <span
                       style={{
-                        fontSize: '0.98rem',
+                        fontSize: '15px',
+                        lineHeight: '20px',
                         color: 'var(--text-primary)',
-                        fontWeight: 600,
+                        fontWeight: 500,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
                       }}
                     >
                       {list.name}
-                    </strong>
+                    </span>
                     {countLabel && (
                       <span
+                        className="mono-num"
                         style={{
-                          fontSize: '0.72rem',
+                          fontSize: '12px',
+                          lineHeight: '16px',
                           color: count?.pending === 0 && count.total > 0 ? 'var(--accent-primary)' : 'var(--text-muted)',
-                          fontWeight: count?.pending === 0 ? 600 : 400,
                           whiteSpace: 'nowrap',
-                          flexShrink: 0,
                         }}
                       >
-                        · {countLabel}
+                        {countLabel}
                       </span>
                     )}
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                   {isActive && (
                     <span
+                      className="mono-num"
                       style={{
-                        fontSize: '0.72rem',
-                        padding: '0.2rem 0.55rem',
-                        borderRadius: '999px',
-                        background: 'var(--accent-primary)',
-                        color: '#ffffff',
-                        fontWeight: 700,
-                        letterSpacing: '0.02em',
+                        fontSize: '12px',
+                        lineHeight: '16px',
+                        color: 'var(--accent-primary)',
+                        fontWeight: 500,
                       }}
                     >
                       Activa
@@ -382,15 +410,13 @@ export default function MarketListsManager() {
                       style={{
                         width: '36px',
                         height: '36px',
+                        minHeight: '36px',
                         padding: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
                         borderRadius: 'var(--radius-sm)',
-                        color: 'var(--text-secondary)',
+                        color: 'var(--text-muted)',
                       }}
                     >
-                      <UiIcon name="moreVertical" size="1.25em" />
+                      <UiIcon name="moreVertical" size={18} />
                     </button>
 
                     {isMenuOpen && (
@@ -402,16 +428,16 @@ export default function MarketListsManager() {
                           position: 'absolute',
                           top: 'calc(100% + 4px)',
                           right: 0,
-                          minWidth: '165px',
+                          minWidth: '168px',
                           background: 'var(--bg-elevated)',
                           border: '1px solid var(--border-default)',
                           borderRadius: 'var(--radius-md)',
-                          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3)',
-                          padding: '0.35rem',
+                          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.24)',
+                          padding: '4px',
                           zIndex: 50,
                           display: 'flex',
                           flexDirection: 'column',
-                          gap: '0.15rem',
+                          gap: '2px',
                         }}
                       >
                         <button
@@ -424,7 +450,7 @@ export default function MarketListsManager() {
                           title="Renombrar lista"
                           style={menuItemStyle}
                         >
-                          <UiIcon name="edit" size="1.1em" />
+                          <UiIcon name="edit" size={16} />
                           <span>Renombrar</span>
                         </button>
 
@@ -438,7 +464,7 @@ export default function MarketListsManager() {
                           title="Compartir lista"
                           style={menuItemStyle}
                         >
-                          <UiIcon name="share" size="1.1em" />
+                          <UiIcon name="share" size={16} />
                           <span>Compartir</span>
                         </button>
 
@@ -452,11 +478,11 @@ export default function MarketListsManager() {
                           title="Copiar texto"
                           style={menuItemStyle}
                         >
-                          <UiIcon name="copy" size="1.1em" />
+                          <UiIcon name="copy" size={16} />
                           <span>Copiar texto</span>
                         </button>
 
-                        <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '0.25rem 0' }} />
+                        <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '4px 0' }} />
 
                         <button
                           type="button"
@@ -468,7 +494,7 @@ export default function MarketListsManager() {
                           title="Eliminar lista"
                           style={{ ...menuItemStyle, color: 'var(--danger)' }}
                         >
-                          <UiIcon name="trash" size="1.1em" />
+                          <UiIcon name="trash" size={16} />
                           <span>Eliminar</span>
                         </button>
                       </div>

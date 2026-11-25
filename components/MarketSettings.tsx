@@ -109,14 +109,23 @@ export default function MarketSettingsComponent() {
       style={{
         maxWidth: '640px',
         margin: '0 auto',
-        paddingTop: 'max(1rem, env(safe-area-inset-top))',
-        paddingBottom: '3.5rem',
-        paddingLeft: '1rem',
-        paddingRight: '1rem',
+        paddingTop: 'max(24px, env(safe-area-inset-top))',
+        paddingBottom: '64px',
+        paddingLeft: '20px',
+        paddingRight: '20px',
       }}
     >
-      <header style={{ marginBottom: '1.25rem' }}>
-        <h1 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
+      <header style={{ marginBottom: '20px' }}>
+        <h1
+          style={{
+            fontSize: '24px',
+            lineHeight: '28px',
+            fontWeight: 500,
+            color: 'var(--text-primary)',
+            letterSpacing: '-0.01em',
+            margin: 0,
+          }}
+        >
           Ajustes
         </h1>
       </header>
@@ -127,14 +136,15 @@ export default function MarketSettingsComponent() {
           role="status"
           className="market-banner"
           style={{
-            background: message.isError ? 'var(--danger-bg)' : 'var(--accent-glow)',
-            border: `1px solid ${message.isError ? 'var(--danger)' : 'var(--accent-primary)'}`,
-            borderRadius: 'var(--radius-md)',
-            color: message.isError ? 'var(--danger)' : 'var(--accent-primary)',
-            padding: '0.7rem 0.95rem',
-            fontSize: '0.85rem',
-            marginBottom: '1rem',
-            fontWeight: 600,
+            background: message.isError ? 'var(--danger-bg)' : 'var(--bg-raised)',
+            border: `1px solid ${message.isError ? 'var(--danger)' : 'var(--border-default)'}`,
+            borderRadius: 'var(--radius-sm)',
+            color: message.isError ? 'var(--danger)' : 'var(--text-primary)',
+            padding: '12px 16px',
+            fontSize: '13px',
+            lineHeight: '18px',
+            marginBottom: '16px',
+            fontWeight: 500,
           }}
         >
           {message.text}
@@ -146,19 +156,20 @@ export default function MarketSettingsComponent() {
         style={{
           background: 'var(--bg-card)',
           border: '1px solid var(--border-subtle)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '1.1rem',
-          marginBottom: '1rem',
+          borderRadius: 'var(--radius-md)',
+          padding: '16px',
+          marginBottom: '16px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
             <span
               style={{
                 width: '36px',
                 height: '36px',
-                borderRadius: 'var(--radius-md)',
-                background: isPaired ? 'var(--accent-glow)' : 'var(--bg-glass)',
+                borderRadius: 'var(--radius-sm)',
+                background: 'var(--bg-raised)',
+                border: '1px solid var(--border-subtle)',
                 color: isPaired ? 'var(--accent-primary)' : 'var(--text-muted)',
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -166,13 +177,13 @@ export default function MarketSettingsComponent() {
                 flexShrink: 0,
               }}
             >
-              <UiIcon name={isPaired ? 'link' : 'unlink'} size="1.15em" />
+              <UiIcon name={isPaired ? 'link' : 'unlink'} size={18} />
             </span>
             <div style={{ minWidth: 0 }}>
-              <h2 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+              <h2 style={{ fontSize: '15px', lineHeight: '20px', fontWeight: 500, color: 'var(--text-primary)', margin: 0 }}>
                 {isPaired ? 'Conectado a RecipeVault' : 'Solo en este dispositivo'}
               </h2>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '0.15rem 0 0' }}>
+              <p className="mono-num" style={{ fontSize: '12px', lineHeight: '16px', color: 'var(--text-muted)', margin: '2px 0 0' }}>
                 {isPaired
                   ? `Vinculado con código ${settings.paired_code}`
                   : 'Almacenamiento local · 100% offline'}
@@ -187,9 +198,10 @@ export default function MarketSettingsComponent() {
               className="btn btn-ghost"
               aria-label="Desvincular de RecipeVault"
               style={{
-                fontSize: '0.8rem',
+                fontSize: '13px',
                 color: 'var(--danger)',
-                padding: '0.45rem 0.75rem',
+                padding: '0 12px',
+                minHeight: '36px',
                 flexShrink: 0,
               }}
             >
@@ -199,8 +211,8 @@ export default function MarketSettingsComponent() {
         </div>
 
         {!isPaired && (
-          <form onSubmit={handlePair} style={{ marginTop: '0.9rem' }}>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <form onSubmit={handlePair} style={{ marginTop: '16px' }}>
+            <div style={{ display: 'flex', gap: '8px' }}>
               <input
                 id="pair-code-input"
                 type="text"
@@ -209,18 +221,20 @@ export default function MarketSettingsComponent() {
                 placeholder="RV-XXXXXX"
                 aria-label="Código de vinculación de RecipeVault"
                 maxLength={9}
+                className="mono-num"
                 style={{
                   flex: 1,
                   minWidth: 0,
-                  padding: '0.65rem 0.85rem',
-                  borderRadius: 'var(--radius-md)',
+                  height: '44px',
+                  padding: '0 12px',
+                  borderRadius: 'var(--radius-sm)',
                   background: 'var(--input-bg)',
                   border: '1px solid var(--border-default)',
                   color: 'var(--text-primary)',
                   textTransform: 'uppercase',
-                  fontWeight: 700,
-                  letterSpacing: '0.05em',
-                  fontSize: '0.95rem',
+                  fontWeight: 500,
+                  letterSpacing: '0.04em',
+                  fontSize: '14px',
                   outline: 'none',
                 }}
               />
@@ -230,19 +244,19 @@ export default function MarketSettingsComponent() {
                 className="btn btn-primary"
                 aria-label="Vincular con RecipeVault"
                 style={{
-                  padding: '0.65rem 1.1rem',
-                  borderRadius: 'var(--radius-md)',
-                  fontWeight: 700,
-                  fontSize: '0.85rem',
+                  height: '44px',
+                  padding: '0 16px',
+                  borderRadius: 'var(--radius-sm)',
+                  fontWeight: 500,
+                  fontSize: '14px',
                   flexShrink: 0,
-                  minHeight: '44px',
                 }}
               >
-                {loading ? 'Vinculando...' : 'Vincular'}
+                {loading ? 'Vinculando' : 'Vincular'}
               </button>
             </div>
-            <p style={{ fontSize: '0.73rem', color: 'var(--text-muted)', marginTop: '0.45rem', marginBottom: 0 }}>
-              Genera el código desde RecipeVault → Compra → Vincular MarketVault.
+            <p style={{ fontSize: '12px', lineHeight: '16px', color: 'var(--text-muted)', marginTop: '8px', marginBottom: 0 }}>
+              Genera el código desde RecipeVault · Compra · Vincular MarketVault
             </p>
           </form>
         )}
@@ -253,15 +267,15 @@ export default function MarketSettingsComponent() {
         style={{
           background: 'var(--bg-card)',
           border: '1px solid var(--border-subtle)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '1.1rem',
-          marginBottom: '1rem',
+          borderRadius: 'var(--radius-md)',
+          padding: '16px',
+          marginBottom: '16px',
         }}
       >
-        <h2 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--text-primary)' }}>
+        <h2 style={{ fontSize: '14px', lineHeight: '20px', fontWeight: 500, marginBottom: '12px', color: 'var(--text-secondary)' }}>
           Apariencia
         </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
           {themes.map((t) => {
             const isSelected = theme === t.value
             return (
@@ -271,24 +285,23 @@ export default function MarketSettingsComponent() {
                 onClick={() => setTheme(t.value)}
                 className="btn btn-ghost"
                 style={{
-                  fontSize: '0.84rem',
-                  padding: '0.6rem 0.85rem',
-                  borderRadius: 'var(--radius-md)',
-                  background: isSelected ? 'var(--accent-glow)' : 'var(--bg-glass)',
-                  border: isSelected ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
-                  color: isSelected ? 'var(--accent-primary)' : 'var(--text-primary)',
-                  fontWeight: isSelected ? 700 : 500,
-                  cursor: 'pointer',
+                  fontSize: '14px',
+                  padding: '0 12px',
+                  borderRadius: 'var(--radius-sm)',
+                  background: isSelected ? 'var(--bg-raised)' : 'transparent',
+                  border: isSelected ? '1px solid var(--border-strong)' : '1px solid var(--border-subtle)',
+                  color: isSelected ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  fontWeight: isSelected ? 500 : 400,
                   minHeight: '44px',
                   justifyContent: 'flex-start',
-                  gap: '0.55rem',
+                  gap: '8px',
                 }}
               >
                 <span
                   aria-hidden="true"
                   style={{
-                    width: '14px',
-                    height: '14px',
+                    width: '12px',
+                    height: '12px',
                     borderRadius: '50%',
                     background: THEME_HEX_MAP[t.value],
                     border: `2px solid ${THEME_ACCENTS[t.value]}`,
@@ -308,17 +321,17 @@ export default function MarketSettingsComponent() {
           style={{
             background: 'var(--bg-card)',
             border: '1px solid var(--border-subtle)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '1rem 1.1rem',
-            marginBottom: '1.25rem',
+            borderRadius: 'var(--radius-md)',
+            padding: '12px 16px',
+            marginBottom: '20px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <span style={{ color: 'var(--accent-primary)', display: 'inline-flex' }}>
-                <UiIcon name="download" size="1.15em" />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ color: 'var(--text-muted)', display: 'inline-flex' }}>
+                <UiIcon name="download" size={18} />
               </span>
-              <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+              <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>
                 Instalar aplicación
               </span>
             </div>
@@ -330,10 +343,10 @@ export default function MarketSettingsComponent() {
                 onClick={handleInstallClick}
                 className="btn btn-primary"
                 style={{
-                  fontSize: '0.8rem',
-                  padding: '0.4rem 0.85rem',
+                  fontSize: '13px',
+                  padding: '0 12px',
                   minHeight: '36px',
-                  borderRadius: 'var(--radius-md)',
+                  borderRadius: 'var(--radius-sm)',
                 }}
               >
                 Instalar
@@ -345,10 +358,10 @@ export default function MarketSettingsComponent() {
                 className="btn btn-ghost"
                 aria-expanded={showInstallGuide}
                 style={{
-                  fontSize: '0.78rem',
+                  fontSize: '13px',
                   color: 'var(--text-muted)',
-                  padding: '0.35rem 0.65rem',
-                  minHeight: '34px',
+                  padding: '0 8px',
+                  minHeight: '36px',
                 }}
               >
                 <span>Cómo instalar</span>
@@ -356,10 +369,10 @@ export default function MarketSettingsComponent() {
                   style={{
                     display: 'inline-flex',
                     transform: showInstallGuide ? 'rotate(180deg)' : 'none',
-                    transition: 'transform 0.15s ease',
+                    transition: 'transform 150ms var(--ease-out)',
                   }}
                 >
-                  <UiIcon name="chevDown" size="0.95em" />
+                  <UiIcon name="chevDown" size={16} />
                 </span>
               </button>
             )}
@@ -368,25 +381,25 @@ export default function MarketSettingsComponent() {
           {showInstallGuide && !installPrompt && (
             <ul
               style={{
-                margin: '0.75rem 0 0',
-                paddingLeft: '1.15rem',
-                fontSize: '0.76rem',
+                margin: '12px 0 4px',
+                paddingLeft: '16px',
+                fontSize: '13px',
                 color: 'var(--text-muted)',
-                lineHeight: 1.55,
+                lineHeight: '20px',
               }}
             >
               <li>
-                <strong>Android (Chrome):</strong> Menú <strong>⋮</strong> → <strong>Instalar aplicación</strong>.
+                Android (Chrome): Menú ⋮ → Instalar aplicación
               </li>
               <li>
-                <strong>iPhone (Safari):</strong> <strong>Compartir (⎋)</strong> → <strong>Añadir a pantalla de inicio</strong>.
+                iPhone (Safari): Compartir → Añadir a pantalla de inicio
               </li>
             </ul>
           )}
         </section>
       )}
 
-      <p style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--text-muted)', opacity: 0.7, marginTop: '1.5rem' }}>
+      <p className="mono-num" style={{ textAlign: 'center', fontSize: '12px', color: 'var(--text-muted)', marginTop: '24px' }}>
         MarketVault · Offline-first PWA
       </p>
 
@@ -394,9 +407,9 @@ export default function MarketSettingsComponent() {
       {showUnpairConfirm && (
         <ConfirmModal
           isOpen={showUnpairConfirm}
-          title="¿Desvincular de RecipeVault?"
-          message="¿Deseas desvincularte del recetario? Todas tus listas locales se mantendrán a salvo en tu teléfono."
-          confirmText="Sí, desvincular"
+          title="Desvincular de RecipeVault"
+          message="Tus listas locales se mantendrán a salvo en este dispositivo."
+          confirmText="Desvincular"
           cancelText="Cancelar"
           isDanger={true}
           onCancel={() => setShowUnpairConfirm(false)}

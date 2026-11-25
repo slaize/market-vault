@@ -98,7 +98,7 @@ export type UiIconName = keyof typeof UI_PATHS
 export function UiIcon({
   name,
   size = '1em',
-  strokeWidth = 2,
+  strokeWidth = 1.5,
   className = '',
   style,
 }: {

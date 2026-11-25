@@ -1,8 +1,23 @@
 import type { Metadata, Viewport } from 'next'
+import { DM_Sans, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import MarketNavigation from '@/components/MarketNavigation'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import ServiceWorkerRegistrar from '@/components/ServiceWorkerRegistrar'
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-sans',
+  display: 'swap',
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-mono',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'MarketVault — Lista de la Compra',
@@ -16,7 +31,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#059669',
+  themeColor: '#161513',
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
@@ -25,7 +40,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="es" className={`${dmSans.variable} ${jetbrainsMono.variable}`}>
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
@@ -35,8 +50,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div
             style={{
               minHeight: '100dvh',
-              background: 'var(--bg-base, #0b101b)',
-              color: 'var(--text-primary, #f8fafc)',
+              background: 'var(--bg-base, #161513)',
+              color: 'var(--text-primary, #efe9de)',
               paddingBottom: '5rem',
             }}
           >

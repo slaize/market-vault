@@ -34,9 +34,9 @@ describe('ShareListModal Component', () => {
       />
     )
 
-    expect(screen.getByText(/📤 Compartir lista/i)).toBeInTheDocument()
+    expect(screen.getByText(/Compartir lista/i)).toBeInTheDocument()
     expect(screen.getByText(/Enviar por WhatsApp/i)).toBeInTheDocument()
-    expect(screen.getByText(/Compartir con el móvil.../i)).toBeInTheDocument()
+    expect(screen.getByText(/Compartir con el móvil/i)).toBeInTheDocument()
     expect(screen.getByText(/Copiar texto formateado/i)).toBeInTheDocument()
     expect(screen.getByText(/Copiar enlace interactivo en vivo/i)).toBeInTheDocument()
   })

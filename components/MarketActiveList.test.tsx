@@ -65,9 +65,9 @@ describe('MarketActiveList Component', () => {
     })
 
     render(<MarketActiveList />)
-    await waitFor(() => screen.getByPlaceholderText(/Añadir producto.../i))
+    await waitFor(() => screen.getByPlaceholderText(/Añadir producto/i))
 
-    const input = screen.getByPlaceholderText(/Añadir producto.../i)
+    const input = screen.getByPlaceholderText(/Añadir producto/i)
     fireEvent.change(input, { target: { value: 'Leche Desnatada' } })
     fireEvent.submit(input.closest('form')!)
 
@@ -154,9 +154,9 @@ describe('MarketActiveList Component', () => {
     ])
 
     render(<MarketActiveList />)
-    await waitFor(() => screen.getByPlaceholderText(/Añadir producto.../i))
+    await waitFor(() => screen.getByPlaceholderText(/Añadir producto/i))
 
-    const input = screen.getByPlaceholderText(/Añadir producto.../i)
+    const input = screen.getByPlaceholderText(/Añadir producto/i)
     fireEvent.change(input, { target: { value: 'Lec' } })
 
     await waitFor(() => {
@@ -185,9 +185,9 @@ describe('MarketActiveList Component', () => {
     ])
 
     render(<MarketActiveList />)
-    await waitFor(() => screen.getByPlaceholderText(/Añadir producto.../i))
+    await waitFor(() => screen.getByPlaceholderText(/Añadir producto/i))
 
-    const input = screen.getByPlaceholderText(/Añadir producto.../i)
+    const input = screen.getByPlaceholderText(/Añadir producto/i)
     fireEvent.change(input, { target: { value: 'Ace' } })
 
     await waitFor(() => {
@@ -229,9 +229,9 @@ describe('MarketActiveList Component', () => {
     })
 
     render(<MarketActiveList />)
-    await waitFor(() => screen.getByPlaceholderText(/Añadir producto.../i))
+    await waitFor(() => screen.getByPlaceholderText(/Añadir producto/i))
 
-    const input = screen.getByPlaceholderText(/Añadir producto.../i)
+    const input = screen.getByPlaceholderText(/Añadir producto/i)
     fireEvent.change(input, { target: { value: 'leche entera' } })
     fireEvent.submit(input.closest('form')!)
 
@@ -262,7 +262,7 @@ describe('MarketActiveList Component', () => {
     render(<MarketActiveList />)
     await waitFor(() => screen.getByText('Manzanas Golden'))
 
-    const input = screen.getByPlaceholderText(/Añadir producto.../i)
+    const input = screen.getByPlaceholderText(/Añadir producto/i)
     fireEvent.change(input, { target: { value: '1.5kg manzanas golden' } })
     fireEvent.submit(input.closest('form')!)
 

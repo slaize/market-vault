@@ -56,9 +56,9 @@ describe('MarketListsManager Component', () => {
     })
 
     render(<MarketListsManager />)
-    await waitFor(() => screen.getByPlaceholderText(/Nombre de la nueva lista.../i))
+    await waitFor(() => screen.getByPlaceholderText(/Nueva lista/i))
 
-    const input = screen.getByPlaceholderText(/Nombre de la nueva lista.../i)
+    const input = screen.getByPlaceholderText(/Nueva lista/i)
     fireEvent.change(input, { target: { value: 'Farmacia' } })
     fireEvent.submit(input.closest('form')!)
 
