@@ -6,7 +6,8 @@ import {
   getMarketSettings,
   saveMarketSettings,
   findLocalListByRemoteId,
-  type MarketItem,
+  updateLocalItemRemoteId,
+  normalizeProductText,
 } from './market-db'
 
 export const RECIPE_VAULT_URL = (
@@ -40,13 +41,13 @@ export async function pairHouseholdWithCode(code: string): Promise<{ ok: boolean
               remote_list_id: remote.id,
             })
 
-            // Existing local items mapped by remote_item_id or name
+            // Existing local items mapped by remote_item_id or normalized name
             const currentLocalItems = (await getLocalItems(localList.id)) || []
             const localByRemoteId = new Map(currentLocalItems.map((i) => [i.remote_item_id, i]))
-            const localByName = new Map(currentLocalItems.map((i) => [i.name.toLowerCase().trim(), i]))
+            const localByName = new Map(currentLocalItems.map((i) => [normalizeProductText(i.name), i]))
 
             for (const item of remote.shopping_list_items || []) {
-              const match = localByRemoteId.get(item.id) || localByName.get(item.name.toLowerCase().trim())
+              const match = localByRemoteId.get(item.id) || localByName.get(normalizeProductText(item.name))
               await saveLocalItem({
                 id: match?.id,
                 list_id: localList.id,
@@ -56,6 +57,7 @@ export async function pairHouseholdWithCode(code: string): Promise<{ ok: boolean
                 unit: item.unit,
                 category: item.category,
                 is_checked: item.is_checked,
+                sort_order: match?.sort_order,
               })
             }
 
@@ -106,6 +108,33 @@ function enqueueRemoteTask<T>(fn: () => Promise<T>): Promise<T> {
   return run
 }
 
+async function addPendingRemoteDelete(remoteItemId: string): Promise<void> {
+  try {
+    const settings = await getMarketSettings()
+    const current = new Set(settings.pending_remote_deletes || [])
+    if (!current.has(remoteItemId)) {
+      current.add(remoteItemId)
+      await saveMarketSettings({ pending_remote_deletes: Array.from(current) })
+    }
+  } catch {
+    // Ignore storage error
+  }
+}
+
+async function removePendingRemoteDelete(remoteItemId: string): Promise<void> {
+  try {
+    const settings = await getMarketSettings()
+    const current = settings.pending_remote_deletes || []
+    if (current.includes(remoteItemId)) {
+      await saveMarketSettings({
+        pending_remote_deletes: current.filter((id) => id !== remoteItemId),
+      })
+    }
+  } catch {
+    // Ignore storage error
+  }
+}
+
 export async function syncActiveListWithRemote(): Promise<{ ok: boolean; synced: boolean; error?: string }> {
   try {
     // Wait for any in-flight local remote mutations (deletes, toggles, adds) before fetching
@@ -122,6 +151,27 @@ export async function syncActiveListWithRemote(): Promise<{ ok: boolean; synced:
     if (!activeList || !activeList.remote_list_id) {
       // Local-only list (e.g. Farmacia, Ferretería): do not contaminate with RecipeVault items
       return { ok: true, synced: false }
+    }
+
+    // 1. Flush any persisted remote deletes that failed/aborted when the PWA closed
+    const pendingDeletes = new Set([
+      ...recentlyDeletedRemoteIds,
+      ...(settings.pending_remote_deletes || []),
+    ])
+    for (const delId of pendingDeletes) {
+      try {
+        const delRes = await fetch(
+          `${RECIPE_VAULT_URL}/api/s/${settings.paired_token}?item_id=${encodeURIComponent(delId)}`,
+          { method: 'DELETE' }
+        )
+        if (delRes.ok || delRes.status === 404) {
+          recentlyDeletedRemoteIds.delete(delId)
+          pendingDeletes.delete(delId)
+          await removePendingRemoteDelete(delId)
+        }
+      } catch {
+        // Keep in pendingDeletes to retry next sync
+      }
     }
 
     const res = await fetch(`${RECIPE_VAULT_URL}/api/s/${settings.paired_token}`)
@@ -142,12 +192,60 @@ export async function syncActiveListWithRemote(): Promise<{ ok: boolean; synced:
     }
 
     const localItems = (await getLocalItems(settings.active_list_id)) || []
-    const localByRemoteId = new Map(localItems.map((i) => [i.remote_item_id, i]))
-    const localByName = new Map(localItems.map((i) => [i.name.toLowerCase().trim(), i]))
+    const localByRemoteId = new Map(
+      localItems.filter((i) => i.remote_item_id).map((i) => [i.remote_item_id!, i])
+    )
+    const localByName = new Map(localItems.map((i) => [normalizeProductText(i.name), i]))
+    const matchedLocalIds = new Set<string>()
 
     for (const remoteItem of remote.shopping_list_items || []) {
-      if (recentlyDeletedRemoteIds.has(remoteItem.id)) continue
-      const match = localByRemoteId.get(remoteItem.id) || localByName.get(remoteItem.name.toLowerCase().trim())
+      if (pendingDeletes.has(remoteItem.id) || recentlyDeletedRemoteIds.has(remoteItem.id)) continue
+      const match =
+        localByRemoteId.get(remoteItem.id) || localByName.get(normalizeProductText(remoteItem.name))
+
+      if (match) {
+        matchedLocalIds.add(match.id)
+      }
+
+      // If this item was newly added locally (no remote_item_id yet) as pending,
+      // do NOT let an old checked item on RecipeVault hide it under "Comprados".
+      const localNewlyAddedOverCheckedRemote = Boolean(
+        match && !match.remote_item_id && !match.is_checked && remoteItem.is_checked
+      )
+
+      if (localNewlyAddedOverCheckedRemote && match) {
+        const mergedQty = match.quantity ?? remoteItem.quantity ?? null
+        const mergedUnit = match.unit ?? remoteItem.unit ?? null
+        await saveLocalItem({
+          id: match.id,
+          list_id: settings.active_list_id,
+          remote_item_id: remoteItem.id,
+          name: match.name,
+          quantity: mergedQty,
+          unit: mergedUnit,
+          category: match.category,
+          is_checked: false,
+          sort_order: match.sort_order,
+        })
+        try {
+          await fetch(`${RECIPE_VAULT_URL}/api/s/${settings.paired_token}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              item_id: remoteItem.id,
+              is_checked: false,
+              name: match.name,
+              quantity: mergedQty,
+              unit: mergedUnit,
+              category: match.category,
+            }),
+          })
+        } catch {
+          // Will reconcile on next sync
+        }
+        continue
+      }
+
       await saveLocalItem({
         id: match?.id,
         list_id: settings.active_list_id,
@@ -157,7 +255,42 @@ export async function syncActiveListWithRemote(): Promise<{ ok: boolean; synced:
         unit: remoteItem.unit,
         category: remoteItem.category,
         is_checked: remoteItem.is_checked,
+        sort_order: match?.sort_order,
       })
+    }
+
+    // 2. Push any unsynced local items (added offline or before Android PWA was suspended) up to RecipeVault
+    for (const localItem of localItems) {
+      if (localItem.remote_item_id || matchedLocalIds.has(localItem.id)) continue
+      if (localMutationEpoch !== startEpoch) break
+      try {
+        const pushRes = await fetch(`${RECIPE_VAULT_URL}/api/s/${settings.paired_token}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: localItem.name,
+            quantity: localItem.quantity,
+            unit: localItem.unit,
+            category: localItem.category,
+          }),
+        })
+        if (pushRes.ok) {
+          const pushJson = await pushRes.json().catch(() => ({}))
+          const newRemoteId = pushJson?.data?.id
+          if (newRemoteId) {
+            await updateLocalItemRemoteId(localItem.id, newRemoteId)
+            if (localItem.is_checked) {
+              await fetch(`${RECIPE_VAULT_URL}/api/s/${settings.paired_token}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item_id: newRemoteId, is_checked: true }),
+              }).catch(() => {})
+            }
+          }
+        }
+      } catch {
+        // Offline or transient error: keep local item, retry on next sync
+      }
     }
 
     await saveMarketSettings({
@@ -247,6 +380,7 @@ export function remoteDeleteItem(remoteItemId: string | undefined | null): Promi
   if (!remoteItemId) return Promise.resolve()
   recentlyDeletedRemoteIds.add(remoteItemId)
   return enqueueRemoteTask(async () => {
+    await addPendingRemoteDelete(remoteItemId)
     const settings = await getMarketSettings()
     if (settings.sync_mode !== 'paired_household' || !settings.paired_token) return
 
@@ -254,11 +388,12 @@ export function remoteDeleteItem(remoteItemId: string | undefined | null): Promi
       const res = await fetch(`${RECIPE_VAULT_URL}/api/s/${settings.paired_token}?item_id=${encodeURIComponent(remoteItemId)}`, {
         method: 'DELETE',
       })
-      if (res.ok) {
+      if (res.ok || res.status === 404) {
         recentlyDeletedRemoteIds.delete(remoteItemId)
+        await removePendingRemoteDelete(remoteItemId)
       }
     } catch {
-      // Graceful offline tolerance
+      // Graceful offline tolerance; persisted in pending_remote_deletes for next sync
     }
   })
 }

@@ -30,6 +30,7 @@ export interface MarketSettings {
   paired_token?: string | null
   last_synced_at: string | null
   custom_icons?: Record<string, string>
+  pending_remote_deletes?: string[]
 }
 
 export interface ProductHistoryItem {
@@ -128,26 +129,51 @@ export async function getLocalLists(): Promise<MarketList[]> {
   })
 }
 
+export async function requestPersistentStorage(): Promise<boolean> {
+  try {
+    if (typeof navigator !== 'undefined' && navigator.storage?.persist) {
+      const already = navigator.storage.persisted ? await navigator.storage.persisted() : false
+      if (already) return true
+      return await navigator.storage.persist()
+    }
+  } catch {
+    // Ignore unsupported or denied storage persistence
+  }
+  return false
+}
+
 export async function saveLocalList(
   input: Partial<MarketList> & { name: string }
 ): Promise<MarketList> {
   const db = await openDb()
   const now = new Date().toISOString()
-  const list: MarketList = {
-    id: input.id || crypto.randomUUID(),
-    name: formatItemName(input.name),
-    week_start: input.week_start || null,
-    is_archived: Boolean(input.is_archived),
-    remote_list_id: input.remote_list_id || null,
-    created_at: input.created_at || now,
-    updated_at: now,
-  }
 
   return new Promise((resolve, reject) => {
     const tx = db.transaction('lists', 'readwrite')
-    tx.objectStore('lists').put(list)
-    tx.oncomplete = () => resolve(list)
+    const store = tx.objectStore('lists')
     tx.onerror = () => reject(tx.error)
+
+    const writeList = (existing?: MarketList) => {
+      const list: MarketList = {
+        id: input.id || existing?.id || crypto.randomUUID(),
+        name: formatItemName(input.name),
+        week_start: input.week_start !== undefined ? input.week_start : (existing?.week_start ?? null),
+        is_archived: input.is_archived !== undefined ? Boolean(input.is_archived) : Boolean(existing?.is_archived),
+        remote_list_id: input.remote_list_id !== undefined ? input.remote_list_id : (existing?.remote_list_id ?? null),
+        created_at: input.created_at || existing?.created_at || now,
+        updated_at: now,
+      }
+      store.put(list)
+      tx.oncomplete = () => resolve(list)
+    }
+
+    if (input.id) {
+      const getReq = store.get(input.id)
+      getReq.onsuccess = () => writeList(getReq.result as MarketList | undefined)
+      getReq.onerror = () => reject(getReq.error)
+    } else {
+      writeList()
+    }
   })
 }
 

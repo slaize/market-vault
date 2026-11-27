@@ -17,6 +17,7 @@ import {
   getFrequentProducts,
   saveCustomProductIcon,
   normalizeProductText,
+  requestPersistentStorage,
   type MarketList,
   type MarketItem,
   type ProductHistoryItem,
@@ -116,12 +117,18 @@ export default function MarketActiveList() {
 
       const current = allLists.find((l) => l.id === settings.active_list_id) || allLists[0]
       setActiveList(current)
+      if (settings.active_list_id !== current.id) {
+        Promise.resolve(saveMarketSettings({ active_list_id: current.id })).catch(() => {})
+      }
 
       const listItems = await getLocalItems(current.id)
       setItems(listItems)
 
       // Load frequent products
       getFrequentProducts(8).then(setFrequentProducts)
+
+      // Request persistent storage so Android/mobile browsers never evict IndexedDB
+      Promise.resolve(requestPersistentStorage()).catch(() => {})
 
       // Background sync if paired
       if (settings.sync_mode === 'paired_household' && settings.paired_token) {
@@ -159,17 +166,23 @@ export default function MarketActiveList() {
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
         requestWakeLock()
+        loadData()
       }
     }
+    const handleOnline = () => {
+      loadData()
+    }
     document.addEventListener('visibilitychange', handleVisibility)
+    window.addEventListener('online', handleOnline)
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility)
+      window.removeEventListener('online', handleOnline)
       if (sentinel && typeof sentinel.release === 'function') {
         sentinel.release().catch(() => {})
       }
     }
-  }, [])
+  }, [loadData])
 
   const triggerHaptic = (pattern: number | number[] = 15) => {
     try {
@@ -262,14 +275,33 @@ export default function MarketActiveList() {
         showToast(`«${existing.name}» reactivado en tu lista`)
         getFrequentProducts(8).then(setFrequentProducts)
 
-        if (isRemoteActiveList && existing.remote_item_id) {
-          remoteToggleItem(existing.remote_item_id, false)
-          if (nextQty !== existing.quantity || nextUnit !== existing.unit) {
-            remoteUpdateItem(existing.remote_item_id, {
+        if (isRemoteActiveList) {
+          if (existing.remote_item_id) {
+            remoteToggleItem(existing.remote_item_id, false)
+            if (nextQty !== existing.quantity || nextUnit !== existing.unit) {
+              remoteUpdateItem(existing.remote_item_id, {
+                name: reactivated.name,
+                quantity: reactivated.quantity,
+                unit: reactivated.unit,
+                category: reactivated.category,
+              })
+            }
+          } else {
+            remoteAddItem({
               name: reactivated.name,
               quantity: reactivated.quantity,
               unit: reactivated.unit,
               category: reactivated.category,
+            }).then((remoteId) => {
+              if (!remoteId) return
+              if (deletedLocalIdsRef.current.has(reactivated.id)) {
+                remoteDeleteItem(remoteId)
+              } else {
+                updateLocalItemRemoteId(reactivated.id, remoteId).catch(() => {})
+                setItems((prev) =>
+                  prev.map((i) => (i.id === reactivated.id ? { ...i, remote_item_id: remoteId } : i))
+                )
+              }
             })
           }
         }
@@ -513,7 +545,7 @@ export default function MarketActiveList() {
     if (!activeList) return
     setItems((prev) => prev.filter((i) => !i.is_checked))
     await clearCheckedLocalItems(activeList.id)
-    if (isPaired && pairedToken) {
+    if (isPaired && pairedToken && activeList.remote_list_id) {
       remoteClearChecked()
     }
     showToast('Productos comprados limpiados')

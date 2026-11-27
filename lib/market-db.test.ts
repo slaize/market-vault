@@ -313,4 +313,16 @@ describe('MarketVault Local-First IndexedDB Engine', () => {
     settings = await getMarketSettings()
     expect(settings.custom_icons?.['leche de soja']).toBeUndefined()
   })
+
+  it('preserves remote_list_id when renaming a list via saveLocalList', async () => {
+    const linked = await saveLocalList({ name: 'Lista Hogar', remote_list_id: 'remote-abc' })
+    const renamed = await saveLocalList({ id: linked.id, name: 'Supermercado' })
+
+    expect(renamed.name).toBe('Supermercado')
+    expect(renamed.remote_list_id).toBe('remote-abc')
+
+    const found = await findLocalListByRemoteId('remote-abc')
+    expect(found?.id).toBe(linked.id)
+    expect(found?.name).toBe('Supermercado')
+  })
 })
